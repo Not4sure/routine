@@ -62,8 +62,6 @@ class MySQL {
 		$errors = [
 			1054 # Unknown column
 		];
-		printme( $query ? $query : $this -> sql);
-		printme( $this -> connection -> error );
 		if ( in_array( $this -> connection -> errno, $errors ) )
 			$result = true;
 		return $result;

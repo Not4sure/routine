@@ -1,8 +1,12 @@
 <?php
 /**
- * Telegram communication serice
+ * Telegram communication service
+ *
+ * @author Serhii Shkrabak
+ * @author Juliy Maievskij
+ * @global object $CORE->model->UNI
+ * @package Model\Services
  */
-
 namespace Model\Services;
 class Telegram
 {
@@ -10,7 +14,7 @@ class Telegram
 
     private ?Int $chat;
 
-    public function send(String $text, Int $chat = 0, Array $keyboard = [], Int $reload = 0) {
+    public function send(String $text, Int $chat = 0, ?Array $keyboard = [], Int $reload = 0) {
         if(!$chat)
             $chat = $this->chat;
         if($reload)
@@ -22,8 +26,13 @@ class Telegram
             $reply = '&reply_markup=';
             $reply .= json_encode( [
                 'keyboard' => $keyboard,
-                'one_time_keyboard' => true,
+                'one_time_keyboard' => false,
                 'resize_keyboard' => true
+            ]);
+        } elseif($keyboard === null) {
+            $reply = '&reply_markup=';
+            $reply .= json_encode( [
+                'remove_keyboard' => true
             ]);
         }
 
@@ -40,7 +49,7 @@ class Telegram
         return $this;
     }
 
-    private function getContext(\Model\Entities\User $user, String $text, ?String $entrypoint = null):string {
+    private function getContext(\Model\Entities\User $user, String $text):string {
         $message = \Model\Entities\Message::search(id: $user->message, limit: 1);
         $fields = $message->getChildren();
         $input = $user->input;
@@ -104,27 +113,33 @@ class Telegram
         $text = $entrypoint['text'];
         $keyboard = [];
         $reload = 0;
-        $type = 0;
-
-        /**
-         *  $terminal contains data from callback_query
-         */
-//        if ($terminal) {
-//            $command = json_decode($terminal, true);
-//            $entry = $command['entry'];
-//            $type = $command['type'];
-//            if ($command['reload']) {
-//                $reload = $entrypoint['message_id'];
-//            }
-//        }
 
         if ($user->message)
             $response = $this->getContext($user, $text);
         else {
-            $message = \Model\Entities\Message::search(entrypoint: isset($entry) ? $entry : $text, limit: 1);
+            $message = \Model\Entities\Message::search(entrypoint: $text, limit: 1);
             if ($message) {
-                $response = ($message->title ? '*' . $message->title . "*\n\n" : '') . $message->text;
-                $keyboard = $message->getKeyboard();
+                switch($message->type) {
+                    case 2: // вводиться форма
+                        if ($entrypoint) {
+                            $user->set([
+                                'message' => $message->id,
+                                'input' => []
+                            ]);
+                            $field = $message->getChildren(1);
+                            $response = ( $field->title ? '*' . $field->title . "*\n\n" : '') . $field->text;
+                            $keyboard = null;
+                        }
+                        break;
+                    default:
+                        if($user->division == null && $message->entrypoint != '/start') {
+                            $response = $this->getReply('no division');
+                            break;
+                        }
+                        $response = ($message->title ? '*' . $message->title . "*\n\n" : '') . $message->text;
+                        $keyboard = $message->getKeyboard(columns: 2);
+
+                }
             } else {
                 $response = $this->getReply('unknown');
             }

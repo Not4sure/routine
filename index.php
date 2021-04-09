@@ -3,16 +3,18 @@
  * Core bootloader
  *
  * @author Serhii Shkrabak
+ * @author Juliy Maievskij
  */
 
 /* RESULT STORAGE */
 $RESULT = [
     'state' => 0,
-    'data' => []
+    'message' => 'ok'
 ];
 
 /* ENVIRONMENT SETUP */
 define('ROOT', $_SERVER['DOCUMENT_ROOT'] . '/'); // Unity entrypoint;
+define('ORIGIN', $_SERVER['HTTP_ORIGIN']); // HTTP origin;
 
 spl_autoload_register('load'); // Class autoloader
 
@@ -37,6 +39,7 @@ function load (String $class):void {
  */
 function shutdown():void {
     global $RESULT;
+
     $error = error_get_last();
     if (!$error) {
         header("Content-Type: application/json");
@@ -48,6 +51,9 @@ function shutdown():void {
  * Error logger
  */
 function handler (Throwable $e):void {
+    global $RESULT;
+    $RESULT['state'] = $e->getCode() != 0 ? $e->getCode() : 6;
+    $RESULT['message'] = $e->getMessage();
     $errors = [];
 	while($e !== null) {
         $errors[] = [
@@ -71,5 +77,6 @@ function printMe(null|string|array $str) {          //Запись str в фай
     file_put_contents('strLog.txt', $str. "\n\n", FILE_APPEND);
 }
 
-$CORE = new \AIRController\Main;
-$RESULT['data'] = $CORE->exec();
+$CORE = new \Controller\Main;
+$data = $CORE->exec();
+if($data !== null) $RESULT['data'] = $data;

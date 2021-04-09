@@ -8,6 +8,8 @@
  */
 namespace Model\Entities;
 
+use http\Params;
+
 class Message
 {
 	use \Library\Shared;
@@ -46,28 +48,39 @@ class Message
 		return $this::search(parent: $this->id, limit: $limit);
 	}
 
-	public function getKeyboard():array {
+	public function getKeyboard(bool $inline = false, int $columns = 0):array {
 
 		$buttons = [];
 		$back = null;
-
+        $row = 0;
+        $column = 0;
 		foreach ( $this->getChildren() as $button) {
 			$entrypoint = '';
 			if ($button->entrypoint) {
 				$entrypoint = $button->entrypoint;
-				$back = [['text' => '◀️ Попереднє меню', 'callback_data' => '9']];
 			}
 
-			if ($button->title)
-			$buttons[] = ['text' => $button->title, 'callback_data' => json_encode([
-				'id' => $button->id,
-				'type' => $button->type,
-				'entry' => $button->entrypoint ? $button->entrypoint : $entrypoint,
-				'reload' => $button->reload
-			])];
+			if ($button->title) {
+			    if($inline)
+                    $buttons[][] = ['text' => $button->title, 'callback_data' => json_encode([
+                        'id' => $button->id,
+                        'type' => $button->type,
+                        'entry' => $button->entrypoint ? $button->entrypoint : $entrypoint,
+                        'reload' => $button->reload
+                    ])];
+			    else {
+                    $buttons[$row][$column] = ['text' => $button->title];
+                    $column++;
+                    if($column >= $columns && $columns > 0) {
+                        $column = 0;
+                        $row++;
+                    }
+                }
+
+            }
 		}
 
-		return $buttons ? ($back ? [$buttons, $back] : [$buttons]) : [];
+		return $buttons ?  $buttons : [];
 	}
 
 	public function __construct(public Int $id = 0, public ?Int $parent = 0, public Int $type = 0, public ?String $guid = null,

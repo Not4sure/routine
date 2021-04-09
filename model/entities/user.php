@@ -38,7 +38,7 @@ class User
         return $this;
     }
 
-    public function __construct(public Int $id = 0, public ?Int $chat = null, public ?String $guid = null, public ?Int $message = null, public ?Int $service = null, public String|Array|Null $input = '') {
+    public function __construct(public Int $id = 0, public ?Int $chat = null, public ?String $guid = null, public ?Int $message = null, public ?Int $service = null, public String|Array|Null $input = '', public ?String $division = null,) {
         $this->db = $this->getDB();
         $this->input = $this->input ? json_decode($this->input, true) : [];
     }

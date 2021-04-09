@@ -1,8 +1,9 @@
 <?php
 /**
- * AIR routine bot
+ * ONPU routine bot
  *
- * @author Yulij Maievskij
+ * @author Serhii Shkrabak
+ * @author Juliy Maievskij
  * @global object $CORE->model
  * @package Model\Main
  */
@@ -22,7 +23,6 @@ class Main
         if($data['token'] == $this->getVar('TG_TOKEN', 'e')) {
             $input = $data['input'];
             $input = json_decode($input, true);
-            printMe($input);
 
             if(isset($input['callback_query'])){
                 $this->TG->process($input['callback_query']['message']);
@@ -36,12 +36,12 @@ class Main
                         $this->TG->allert($data['input']);
         } else
             throw new \Exception('TOKEN blyat', 3);
-        return [];
+        return null;
     }
 
     public function uniwebhook(array $data): ?array {
         $query = json_decode($data['query'], 1);
-        if (/*$data['token'] == $this->getVar('UNI_TOKEN', 'e')*/ 1) {
+        if (/*$data['token'] == $this->getVar('UNI_TOKEN', 'e')*/1) {
             foreach ($query as $request) {
                 $result[] = $this->UNI->process($request);
             }
