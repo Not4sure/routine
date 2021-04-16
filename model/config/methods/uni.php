@@ -3,14 +3,16 @@ $methods = [
     'webhook' => [
         'params' => [
             [
-                'name' => 'token',
-                'source' => 'p',
-                'required' => false
+                'name' => 'type',
+                'default' => ''
             ],
             [
-                'name' => 'query',
-                'source' => 'p',
-                'required' => true
+                'name' => 'value',
+                'default' => ''
+            ],
+            [
+                'name' => 'code',
+                'default' => 0
             ]
         ]
     ]

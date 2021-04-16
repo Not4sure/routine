@@ -8,20 +8,17 @@
  * @package Model\Main
  */
 namespace Model;
-use http\Encoding\Stream;
-use Model\Services\Uni;
+use \Library\Uniroad;
+//use \Services\Uniroad;
 
 class Main
 {
 	use \Library\Shared;
 
 	private \Model\Services\Telegram $TG;
-	private \Model\Services\Uni $UNI;
 
-	public function tgwebhook(array $data): ?array {
-
-        if($data['token'] == $this->getVar('TG_TOKEN', 'e')) {
-            $input = $data['input'];
+	public function tgwebhook(string $token, string $input): ?array {
+        if($token == $this->getVar('TG_TOKEN', 'e')) {
             $input = json_decode($input, true);
 
             if(isset($input['callback_query'])){
@@ -33,22 +30,56 @@ class Main
                     if(isset($input['message']))
                         $this->TG->process($input['message']);
                     else
-                        $this->TG->allert($data['input']);
+                        $this->TG->allert($input);
         } else
             throw new \Exception('TOKEN blyat', 3);
         return null;
     }
 
-    public function uniwebhook(array $data): ?array {
-        $query = json_decode($data['query'], 1);
-        if (/*$data['token'] == $this->getVar('UNI_TOKEN', 'e')*/1) {
-            foreach ($query as $request) {
-                $result[] = $this->UNI->process($request);
-            }
-        } else
-            throw new \Exception('Wrong uni token', 4);
-        printMe($result);
+    public function uniwebhook(String $type = '', String $value = '', Int $code = 0):?array {
+        $result = null;
+        printMe(['type' => $type, 'value' => $value]);
+        switch ($type) {
+            case 'message':
+                if ($value == 'вийти') {
+                    $result = ['type' => 'context', 'set' => null];
+                } elseif ($value == '/start')
+                    $result = [
+                        'type' => 'message',
+                        'value' => 'Розклад буде',
+                        'to' => $this->getVar('user'),
+                        'keyboard' => [
+                            'inline' => true,
+                            'buttons' => \Model\Entities\Message::search(entrypoint: $value, limit: 1)->getKeyboard(uni: true, columns: 2)
+                        ]
+                    ];
+                break;
+            case 'click':
+                $result = [
+                    'type' => 'message',
+                    'value' => "Сервіс Розклад. Натиснуто кнопку $code",
+                    'user' => $this->getVar('user'),
+                    'keyboard' => [
+                        'inline' => false,
+                        'buttons' => [
+                            [['id' => 9, 'title' => 'Надати номер', 'request' => 'contact']]
+                        ]
+                    ]
+                ];
+                if($code == 16)
+                    $this->uni()->get('proxy', [
+                        'firstname' => 'Doctor Who',
+                        'secondname' => 'Corporation',
+                        'phone' => '380665413986'
+                    ], 'form/submitAmbassador')->one();
+                break;
+        }
+
         return $result;
+    }
+
+    public function rotineget(string $user): array{
+	    return ['Тут буде розклад на тиждень'];
     }
 
 	public function __construct() {
@@ -60,6 +91,5 @@ class Main
             ) );
 		$this->setDB($this->db);
         $this -> TG = new Services\Telegram(key: $this->getVar('TG_TOKEN', 'e'), emergency: 165091981);
-        $this->UNI = new Services\Uni(key: $this->getVar('UNI_TOKEN', 'e'));
 	}
 }

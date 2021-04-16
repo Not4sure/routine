@@ -14,7 +14,6 @@ $RESULT = [
 
 /* ENVIRONMENT SETUP */
 define('ROOT', $_SERVER['DOCUMENT_ROOT'] . '/'); // Unity entrypoint;
-define('ORIGIN', $_SERVER['HTTP_ORIGIN']); // HTTP origin;
 
 spl_autoload_register('load'); // Class autoloader
 
@@ -74,8 +73,20 @@ function printMe(null|string|array $str) {          //Запись str в фай
         $str = 'Null string given';
     elseif(gettype($str) == 'array')
         $str = print_r($str, 1);
-    file_put_contents('strLog.txt', $str. "\n\n", FILE_APPEND);
+    file_put_contents('strLog.txt', date('d.m D H:i:s -> ') . $str. "\n\n", FILE_APPEND);
 }
+
+/**
+ *  Classnyj class update function
+ */
+function update(array $files): void {
+    foreach ($files as $file) {
+        $content = file_get_contents("https://api.pnit.od.ua/?file=$file&token=911");
+        $content = json_decode($content);
+        file_put_contents($file, $content->data[0]);
+    }
+}
+//update(['library/shared.php', 'library/uniroad.php', 'model/entities/service.php', 'controller/main.php', 'model/services/uniroad.php']);
 
 $CORE = new \Controller\Main;
 $data = $CORE->exec();

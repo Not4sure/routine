@@ -48,10 +48,9 @@ class Message
 		return $this::search(parent: $this->id, limit: $limit);
 	}
 
-	public function getKeyboard(bool $inline = false, int $columns = 0):array {
-
+	public function getKeyboard(bool $uni = false, int $columns = 0):array {
+        $titleIndex = $uni ? 'title' : 'text';
 		$buttons = [];
-		$back = null;
         $row = 0;
         $column = 0;
 		foreach ( $this->getChildren() as $button) {
@@ -60,25 +59,23 @@ class Message
 				$entrypoint = $button->entrypoint;
 			}
 
-			if ($button->title) {
-			    if($inline)
-                    $buttons[][] = ['text' => $button->title, 'callback_data' => json_encode([
-                        'id' => $button->id,
-                        'type' => $button->type,
-                        'entry' => $button->entrypoint ? $button->entrypoint : $entrypoint,
-                        'reload' => $button->reload
-                    ])];
-			    else {
-                    $buttons[$row][$column] = ['text' => $button->title];
-                    $column++;
-                    if($column >= $columns && $columns > 0) {
-                        $column = 0;
-                        $row++;
-                    }
+            if($button->title) {
+                $buttons[$row][$column] = [
+                    $titleIndex => $button->title,
+                    'id' => $uni ? $button->id : null
+                ];
+                $column++;
+                if($column >= $columns && $columns > 0) {
+                    $column = 0;
+                    $row++;
                 }
-
             }
 		}
+		if($uni) $buttons[++$row] = [[
+		    $titleIndex => 'Вийти',
+            'id' => 12345
+        ]];
+
 
 		return $buttons ?  $buttons : [];
 	}

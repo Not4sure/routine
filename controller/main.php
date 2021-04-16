@@ -1,9 +1,8 @@
 <?php
 /**
- * ONPU routine bot
+ * User Controller
  *
  * @author Serhii Shkrabak
- * @author Juliy Maievskij
  * @global object $CORE
  * @package Controller\Main
  */
@@ -11,58 +10,103 @@ namespace Controller;
 class Main
 {
 	use \Library\Shared;
-	private \Model\Main $model;
 
-    public function exec():?array {
-        $result = null;
-        $url = $this->getVar('REQUEST_URI', 'e');
-        $url = explode('?', $url)[0];
-        $path = explode('/', $url);
+	private $model;
 
-        if (isset($path[2]) && !strpos($path[1], '.')) { // Disallow directory changing
-            $file = ROOT . 'model/config/methods/' . $path[1] . '.php';
-            if (file_exists($file)) {
-                include $file;
-                if (isset($methods[$path[2]])) {
-                    $details = $methods[$path[2]];
-                    $prevError = null;
-                    $error = null;
-                    $request = [];
-                    foreach ($details['params'] as $param) {
-                        $var = $this->getVar($param['name'], $param['source']);
-                        if($var == '') {
-                            if($param['required']){
-                                $error = new \Exception($param['name'], 1, $prevError);
-                                $prevError = $error;
-                            }
-                        }
-                        if($var !== null)
-                            $request[$param['name']] = $var;
-                    }
+	private function prepare(Mixed $var, Array $param):mixed {
+		$result = null;
+		if ($var) {
+			$result = $var;
+		} else {
+			if (!isset($param['required'])) {
+				if (isset($param['default']))
+					$result = $param['default'];
+				else
+					throw new \Exception($param['name'] . ' has no default value', 6);
+			}
+			else
+				throw new \Exception($param['name'], 1);
+		}
+		return $result;
+	}
 
-                    if($error !== null) throw $error;
+	private function run($method, $data):?array {
+		$result = null;
+		if (method_exists($this->model, $method)) {
+			$callback = [$this->model, $method];
+			$result = call_user_func_array($callback, $data);
+		} else throw new \Exception($method, 5);
+		return $result;
+	}
 
-                    if (method_exists($this->model, $path[1] . $path[2])) {
-                        $method = [$this->model, $path[1] . $path[2]];
-                        $result = $method($request);
-                    }
-                }
-            }
-        }
+	public function exec():?array {
+		$result = null;
+		$url = $this->getVar('REQUEST_URI', 'e');
+		$url = explode('?', $url)[0];
+		$path = explode('/', $url);
 
-        return $result;
-    }
+		if (isset($path[2]) && !strpos($path[1], '.')) { // Disallow directory changing
+			$file = ROOT . 'model/config/methods/' . $path[1] . '.php';
+			$method = $path[1] . $path[2];
+			if (file_exists($file)) {
+				include $file;
+				if (isset($methods[$path[2]])) {
+					$details = $methods[$path[2]];
 
+					$uniget = $this->getVar('uniroad', 'p');
+
+					if ($uniget) {
+						$result = ($method == 'uniwebhook') ? [
+							'callback' => []
+						] : [];
+						$query = $this->getVar('query', 'p');
+						printMe($query);
+						if (gettype($query) == 'string')
+							$query = json_decode($query, true);
+						$data = [];
+						foreach ($query as $task) {
+
+							foreach ($details['params'] as $param) {
+								$var = $this->getVar($param['name'], isset($param['source']) ? $param['source'] : 'p', from: $task);
+								$data[$param['name']] = $this->prepare($var, $param);
+							}
+							if (isset($result['callback'])) {
+								$callback = $this->run($method, $data);
+								if ($callback)
+									$result['callback'][] = $callback;
+							}
+							else
+								$result[] = $this->run($method, $data);
+						}
+					} else {
+						$data = [];
+						foreach ($details['params'] as $param) {
+							$var = $this->getVar($param['name'], isset($param['source']) ? $param['source'] : 'p');
+							$data[$param['name']] = $this->prepare($var, $param);
+						}
+						$result = $this->run($method, $data);
+					}
+
+				}
+
+			}
+			else
+				throw new \Exception("{$path[1]}.{$path[2]}", 5);
+		}
+
+		return $result;
+	}
 
 	public function __construct() {
-        // CORS configuration
-        $front = $this -> getVar('FRONT', 'e');
+		// CORS configuration
+		$origin = $this -> getVar('HTTP_ORIGIN', 'e');
+		$front = $this -> getVar('FRONT', 'e');
 
-        foreach ( [$front] as $allowed )
-            if ( ORIGIN == "https://$allowed") {
-                header('Access-Control-Allow-Origin: '. ORIGIN);
-                header('Access-Control-Allow-Credentials: true');
-            }
-        $this->model = new \Model\Main;
+		foreach ( [$front] as $allowed )
+			if ( $origin == "https://$allowed") {
+				header("Access-Control-Allow-Origin: $origin");
+				header('Access-Control-Allow-Credentials: true');
+			}
+		$this->model = new \Model\Main;
 	}
 }
