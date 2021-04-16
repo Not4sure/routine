@@ -8,9 +8,11 @@
  * @package Model\Services
  */
 namespace Model\Services;
+use \Model\Entities\Routine;
 class Telegram
 {
     use \Library\Shared;
+
 
     private ?Int $chat;
 
@@ -100,6 +102,7 @@ class Telegram
     }
 
     public function process(Array $entrypoint, String $terminal = '', Bool $edited = false) {
+
         if (!isset($this->chat))
             $this->setChat($entrypoint['chat']['id']);
 
@@ -132,12 +135,24 @@ class Telegram
                         }
                         break;
                     default:
-                        if($user->division == null && $message->entrypoint != '/start') {
-                            $response = $this->getReply('no division');
-                            break;
+//                        if($user->division == null && $message->entrypoint != '/start') {
+//                            $response = $this->getReply('no division');
+//                            break;
+//                        }
+                        switch ($message->title) {
+                            case 'Сьогодні' :
+                                $routine = new \Model\Entities\Routine('УП-191');
+                                $response = $routine->getText();
+                                break;
+                            case 'Завтра' :
+                                $routine = new \Model\Entities\Routine('УП-191', strtotime('+1 day'));
+                                $response = $routine->getText();
+                                break;
+                            default:
+                                $response = ($message->title ? '*' . $message->title . "*\n\n" : '') . $message->text;
+                                $keyboard = $message->getKeyboard(columns: 2);
+                                break;
                         }
-                        $response = ($message->title ? '*' . $message->title . "*\n\n" : '') . $message->text;
-                        $keyboard = $message->getKeyboard(columns: 2);
 
                 }
             } else {

@@ -57,21 +57,27 @@ class Main
             case 'click':
                 $result = [
                     'type' => 'message',
-                    'value' => "Сервіс Розклад. Натиснуто кнопку $code",
-                    'user' => $this->getVar('user'),
+                    'to' => $this->getVar('user'),
                     'keyboard' => [
-                        'inline' => false,
-                        'buttons' => [
-                            [['id' => 9, 'title' => 'Надати номер', 'request' => 'contact']]
-                        ]
+                        'inline' => true,
+                        'buttons' => \Model\Entities\Message::search(entrypoint: $value, limit: 1)->getKeyboard(uni: true, columns: 2)
                     ]
                 ];
-                if($code == 16)
-                    $this->uni()->get('proxy', [
-                        'firstname' => 'Doctor Who',
-                        'secondname' => 'Corporation',
-                        'phone' => '380665413986'
-                    ], 'form/submitAmbassador')->one();
+                if($code == 12345)
+                    $result = ['type' => 'context', 'set' => null];
+                elseif($code = 14) {
+                    $routine = new \Model\Entities\Routine('УП-191');
+                    $result['value'] = $routine->getText();
+                }  elseif($code = 20) {
+                    $routine = new \Model\Entities\Routine('УП-191', strtotime('+1 day'));
+                    $result['value'] = $routine->getText();
+                }else {
+                    $result = [
+                        'type' => 'message',
+                        'value' => "Сервіс Розклад. Натиснуто кнопку $code",
+                        'user' => $this->getVar('user')
+                    ];
+                }
                 break;
         }
 

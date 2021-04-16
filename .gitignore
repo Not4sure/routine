@@ -1,0 +1,7 @@
+# Files and directories ignored by git
+
+# phpMyAdmin files
+db/
+
+# any logs
+*Log.*
