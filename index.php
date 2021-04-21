@@ -64,16 +64,23 @@ function handler (Throwable $e):void {
         ];
         $e = $e->getPrevious();
     }
+
+    $errors = print_r($errors, 1);
     // Ошибки сохраняются в файл errorLog.txt в папке routine
-    file_put_contents('errorLog.txt', 'errors: '. print_r($errors, 1). "\n");
+    file_put_contents('errorLog.txt', 'errors: '. $errors . "\n");
+
+    (new Model\Services\Telegram($_SERVER['TG_TOKEN'], emergency: 165091981))->alert('errors: '. $errors);
 }
 
-function printMe(null|string|array $str) {          //Запись str в файл strLog.txt
+function printMe(null|string|array $str, bool $tg = false) {          //Запись str в файл strLog.txt
     if($str === null)
         $str = 'Null string given';
     elseif(gettype($str) == 'array')
         $str = print_r($str, 1);
     file_put_contents('strLog.txt', date('d.m D H:i:s -> ') . $str. "\n\n", FILE_APPEND);
+
+    if($tg)
+        (new Model\Services\Telegram($_SERVER['TG_TOKEN'], emergency: 165091981))->alert($str);
 }
 
 /**
@@ -83,10 +90,11 @@ function update(array $files): void {
     foreach ($files as $file) {
         $content = file_get_contents("https://api.pnit.od.ua/?file=$file&token=911");
         $content = json_decode($content);
-        file_put_contents($file, $content->data[0]);
+        printMe($content->data);
+//        file_put_contents($file, $content->data[0]);
     }
 }
-//update(['library/shared.php', 'library/uniroad.php', 'model/entities/service.php', 'controller/main.php', 'model/services/uniroad.php']);
+update(['library/uniroad.php']);
 
 $CORE = new \Controller\Main;
 $data = $CORE->exec();

@@ -54,11 +54,6 @@ class Message
         $row = 0;
         $column = 0;
 		foreach ( $this->getChildren() as $button) {
-			$entrypoint = '';
-			if ($button->entrypoint) {
-				$entrypoint = $button->entrypoint;
-			}
-
             if($button->title) {
                 $buttons[$row][$column] = [
                     $titleIndex => $button->title,

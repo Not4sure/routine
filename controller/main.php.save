@@ -73,6 +73,7 @@ class Main
 							}
 							if (isset($result['callback'])) {
 								$callback = $this->run($method, $data);
+								printMe($callback);
 								if ($callback)
 								    $result['callback'][] = $callback;
 

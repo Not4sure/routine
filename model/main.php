@@ -38,49 +38,97 @@ class Main
 
     public function uniwebhook(String $type = '', String $value = '', Int $code = 0):?array {
         $result = null;
-        printMe(['type' => $type, 'value' => $value]);
-        switch ($type) {
-            case 'message':
-                if ($value == 'вийти') {
-                    $result = ['type' => 'context', 'set' => null];
-                } elseif ($value == '/start')
-                    $result = [
-                        'type' => 'message',
-                        'value' => 'Розклад буде',
-                        'to' => $this->getVar('user'),
-                        'keyboard' => [
-                            'inline' => true,
-                            'buttons' => \Model\Entities\Message::search(entrypoint: $value, limit: 1)->getKeyboard(uni: true, columns: 2)
-                        ]
-                    ];
-                break;
-            case 'click':
-                $result = [
-                    'type' => 'message',
-                    'to' => $this->getVar('user'),
-                    'keyboard' => [
-                        'inline' => true,
-                        'buttons' => \Model\Entities\Message::search(entrypoint: $value, limit: 1)->getKeyboard(uni: true, columns: 2)
-                    ]
-                ];
-                if($code == 12345)
-                    $result = ['type' => 'context', 'set' => null];
-                elseif($code = 14) {
-                    $routine = new \Model\Entities\Routine('УП-191');
-                    $result['value'] = $routine->getText();
-                }  elseif($code = 20) {
-                    $routine = new \Model\Entities\Routine('УП-191', strtotime('+1 day'));
-                    $result['value'] = $routine->getText();
-                }else {
-                    $result = [
-                        'type' => 'message',
-                        'value' => "Сервіс Розклад. Натиснуто кнопку $code",
-                        'user' => $this->getVar('user')
-                    ];
-                }
-                break;
-        }
+        printMe(['type' => $type, 'value' => $value, 'code' => $code]);
 
+        $user = \Model\Entities\User::search(guid: $this->getVar('user'), limit: 1);
+        if(!isset($user)) $user = new \Model\Entities\User(guid: $this->getVar('user'));
+
+        if($type == 'message') {
+            switch($value) {
+                case 'вийти':
+                    $result = ['type' => 'context', 'set' => null];
+                    break;
+                case '/start':
+                    $user->set(['context' => 1]);
+                default:
+                    //И чЁ?
+            }
+        } elseif($type == 'click') {
+            if($code == 12345) { // Кнопка "назад"
+                if($user->context == 1) {
+                    $result = ['type' => 'context', 'set' => null];
+                } else {
+                    // меняем контекст
+                }
+            } else {
+                $message = \Model\Entities\Message::search(id: $code);
+                switch($message->type) {
+                    case 0:
+                        // message
+                        break;
+                    case 1:
+                        $user->set(['context' => $message->id]);
+                        break;
+                    case 2:
+                        // question
+                        break;
+                }
+            }
+        } else
+            throw new \Exception('А какого, собственно, тип неправильный?', 5);
+
+        if(!isset($result))
+            $result = [
+                'type' => 'message',
+                'value' => 'Розклад буде',
+                'to' => $user->guid,
+                'keyboard' => [
+                    'inline' => true,
+                    'buttons' => \Model\Entities\Message::search(id: $user->context, limit: 1)->getKeyboard(uni: true, columns: 2)
+                ]
+            ];
+
+//        switch ($type) {
+//            case 'message':
+//                if ($value == 'вийти') {
+//                    $result = ['type' => 'context', 'set' => null];
+//                } elseif ($value == '/start') {
+//                    $user->set(['context' => 1]);
+//                    $result = [
+//                        'type' => 'message',
+//                        'value' => 'Розклад буде',
+//                        'to' => $user->guid,
+//                        'keyboard' => [
+//                            'inline' => true,
+//                            'buttons' => \Model\Entities\Message::search(entrypoint: $value, limit: 1)->getKeyboard(uni: true, columns: 3)
+//                        ]
+//                    ];
+//                }
+//                break;
+//            case 'click':
+//                if($code == 12345 && $user->context == null) {
+//                    $result = ['type' => 'context', 'set' => null];
+//                    break;
+//                }
+//                $message = \Model\Entities\Message::search(id: $code);
+//                $result = [
+//                    'type' => 'message',
+//                    'to' => $user->guid,
+//                    'keyboard' => [
+//                        'inline' => true,
+//                        'buttons' => \Model\Entities\Message::search(entrypoint: $value, limit: 1)->getKeyboard(uni: true, columns: 2)
+//                    ]
+//                ];
+//                if($code == 14) {
+//                    $result['value'] = (new \Model\Entities\Routine('УП-191'))->getText();
+//                } elseif($code == 20) {
+//                    $result['value'] = (new \Model\Entities\Routine('УП-191', time: strtotime('+1 day')))->getText();
+//                } else {
+//                    $result['value'] = "Сервіс Розклад. Натиснуто кнопку $code";
+//                }
+//                break;
+//        }
+//
         return $result;
     }
 
