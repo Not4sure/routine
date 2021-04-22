@@ -46,9 +46,8 @@ class Main
 		$path = explode('/', $url);
 
 		if (isset($path[2]) && !strpos($path[1], '.')) { // Disallow directory changing
-			$file = ROOT . 'model/config/methods/' . $path[1] . '.php';
+			$file = ROOT . 'Model/Config/Methods/' . $path[1] . '.php';
 			$method = $path[1] . $path[2];
-            printMe("Request: $method\nBody: ", true);
 
 			if (file_exists($file)) {
 				include $file;
