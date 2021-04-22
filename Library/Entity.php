@@ -9,7 +9,7 @@ namespace Library;
 trait Entity
 {
 
-	private Array $_changed;
+	private array $_changed;
 
 	public function set(Array $fields):self {
 		foreach ($fields as $field => $value) {

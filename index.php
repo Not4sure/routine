@@ -27,7 +27,7 @@ set_exception_handler('handler'); // Handle all errors in one function
  * Class autoloader
  */
 function load (String $class):void {
-	$class = strtolower(str_replace('\\', '/', $class));
+	$class = str_replace('\\', '/', $class);
 	$file = "$class.php";
 	if (file_exists($file))
 		include $file;
@@ -69,7 +69,7 @@ function handler (Throwable $e):void {
     // Ошибки сохраняются в файл errorLog.txt в папке routine
     file_put_contents('errorLog.txt', 'errors: '. $errors . "\n");
 
-    (new Model\Services\Telegram($_SERVER['TG_TOKEN'], emergency: 165091981))->alert('errors: '. $errors);
+//    (new Model\Services\Telegram($_SERVER['TG_TOKEN'], emergency: 165091981))->alert('errors: '. $errors);
 }
 
 function printMe(null|string|array $str, bool $tg = false) {          //Запись str в файл strLog.txt
@@ -77,24 +77,23 @@ function printMe(null|string|array $str, bool $tg = false) {          //Запи
         $str = 'Null string given';
     elseif(gettype($str) == 'array')
         $str = print_r($str, 1);
-    file_put_contents('strLog.txt', date('d.m D H:i:s -> ') . $str. "\n\n", FILE_APPEND);
 
     if($tg)
         (new Model\Services\Telegram($_SERVER['TG_TOKEN'], emergency: 165091981))->alert($str);
+    else
+        file_put_contents('strLog.txt', date('d.m D H:i:s -> ') . $str. "\n\n", FILE_APPEND);
+
 }
 
-/**
- *  Classnyj class update function
- */
-function update(array $files): void {
-    foreach ($files as $file) {
-        $content = file_get_contents("https://api.pnit.od.ua/?file=$file&token=911");
-        $content = json_decode($content);
-        printMe($content->data);
+//function update(array $files): void {
+//    foreach ($files as $file) {
+//        $content = file_get_contents("https://api.pnit.od.ua/?file=$file&token=911");
+//        $content = json_decode($content);
+//        printMe($content->data);
 //        file_put_contents($file, $content->data[0]);
-    }
-}
-update(['library/uniroad.php']);
+//    }
+//}
+//update(['library/uniroad.php']);
 
 $CORE = new \Controller\Main;
 $data = $CORE->exec();

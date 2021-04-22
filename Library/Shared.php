@@ -102,6 +102,7 @@ trait Shared
 		}
 		return  $result;
 	}
+
 	private function setDB(\Library\MySQL $ORM):void {
 		$GLOBALS['DB'] = $ORM;
 	}

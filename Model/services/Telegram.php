@@ -43,7 +43,7 @@ class Telegram
     }
 
     public function alert(String $body = '') {
-        $this->send("Знову все впало: $body", $this->emergency);
+        $this->send($body, $this->emergency);
     }
 
     public function setChat(Int $id):self {

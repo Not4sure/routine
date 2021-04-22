@@ -38,7 +38,6 @@ class Main
 
     public function uniwebhook(String $type = '', String $value = '', Int $code = 0):?array {
         $result = null;
-        printMe(['type' => $type, 'value' => $value, 'code' => $code]);
 
         $user = \Model\Entities\User::search(guid: $this->getVar('user'), limit: 1);
         if(!isset($user)) $user = new \Model\Entities\User(guid: $this->getVar('user'));
@@ -88,47 +87,6 @@ class Main
                 ]
             ];
 
-//        switch ($type) {
-//            case 'message':
-//                if ($value == 'вийти') {
-//                    $result = ['type' => 'context', 'set' => null];
-//                } elseif ($value == '/start') {
-//                    $user->set(['context' => 1]);
-//                    $result = [
-//                        'type' => 'message',
-//                        'value' => 'Розклад буде',
-//                        'to' => $user->guid,
-//                        'keyboard' => [
-//                            'inline' => true,
-//                            'buttons' => \Model\Entities\Message::search(entrypoint: $value, limit: 1)->getKeyboard(uni: true, columns: 3)
-//                        ]
-//                    ];
-//                }
-//                break;
-//            case 'click':
-//                if($code == 12345 && $user->context == null) {
-//                    $result = ['type' => 'context', 'set' => null];
-//                    break;
-//                }
-//                $message = \Model\Entities\Message::search(id: $code);
-//                $result = [
-//                    'type' => 'message',
-//                    'to' => $user->guid,
-//                    'keyboard' => [
-//                        'inline' => true,
-//                        'buttons' => \Model\Entities\Message::search(entrypoint: $value, limit: 1)->getKeyboard(uni: true, columns: 2)
-//                    ]
-//                ];
-//                if($code == 14) {
-//                    $result['value'] = (new \Model\Entities\Routine('УП-191'))->getText();
-//                } elseif($code == 20) {
-//                    $result['value'] = (new \Model\Entities\Routine('УП-191', time: strtotime('+1 day')))->getText();
-//                } else {
-//                    $result['value'] = "Сервіс Розклад. Натиснуто кнопку $code";
-//                }
-//                break;
-//        }
-//
         return $result;
     }
 

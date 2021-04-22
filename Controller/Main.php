@@ -32,7 +32,6 @@ class Main
 
 	private function run($method, $data):?array {
 		$result = null;
-        printMe($method);
 		if (method_exists($this->model, $method)) {
 			$callback = [$this->model, $method];
 			$result = call_user_func_array($callback, $data);
@@ -49,6 +48,7 @@ class Main
 		if (isset($path[2]) && !strpos($path[1], '.')) { // Disallow directory changing
 			$file = ROOT . 'model/config/methods/' . $path[1] . '.php';
 			$method = $path[1] . $path[2];
+            printMe("Request: $method\nBody: ", true);
 
 			if (file_exists($file)) {
 				include $file;
@@ -65,6 +65,7 @@ class Main
 
 						if (gettype($query) == 'string')
 							$query = json_decode($query, true);
+
 						$data = [];
 						foreach ($query as $task) {
 							foreach ($details['params'] as $param) {
@@ -75,7 +76,6 @@ class Main
 								$callback = $this->run($method, $data);
 								if ($callback)
 								    $result['callback'][] = $callback;
-
 							}
 							else
 								$result[] = $this->run($method, $data);
@@ -88,9 +88,7 @@ class Main
 						}
 						$result = $this->run($method, $data);
 					}
-
 				}
-
 			}
 			else
 				throw new \Exception("{$path[1]}.{$path[2]}", 5);

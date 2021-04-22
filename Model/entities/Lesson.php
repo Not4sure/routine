@@ -1,7 +1,7 @@
 <?php
 namespace Model\Entities;
 
-class Lesson{
+class Lesson {
     use \Library\Shared;
 	use \Library\Entity;
 
@@ -19,13 +19,15 @@ class Lesson{
         if(!empty($filters))                                    
             $lessons->where(['Lesson'=> $filters]);
 
-
-
-        foreach ($lessons->many($limit) as $lesson) {
+        foreach($lessons->many($limit) as $lesson) {
             $class = __CLASS__;                                                                                 //класс lesson
-            $lecturers = \Model\Entities\Lecturer::serch(lesson: $lesson['id']);
-            $result[] = new $class($lesson['id'], $lesson['room'], $lesson['subject'], $lesson['week'],         //создаём экземпляр класса 
-                $lesson['day'], $lesson['number'], $lesson['type'], $lesson['comment'], $lecturers);
+            $lecturers = \Model\Entities\Lecturer::search(lesson: $lesson['id']);
+            $groups = \Model\Entities\Division::search(lesson: $lesson['id']);
+            if(isset($lessons['room']))
+                $room = \Model\Entities\Room::search($lessons['room']);
+
+            $result[] = new $class($lecturers, $groups, $lesson['subject'], $lesson['week'], $lesson['day'], $lesson['number'],         //создаём экземпляр класса
+                $room, $lesson['id'], $lesson['type'], $lesson['comment']);
         }
         return $limit == 1 ? (isset($result[0]) ? $result[0] : null) : $result;
     }
@@ -43,8 +45,8 @@ class Lesson{
 		return $this;
 	}
 
-    public function __construct(public Int $id = 0, public array $lecturers, public ?String $room = null, public ?String $subject = null,
-                                public ?String $week = null, public ?Int $day = 0, public ?Int $number = 0,
+    public function __construct(public array $lecturers, public array $groups, public String $subject, public String $week,
+                                public Int $day, public Int $number,  public ?String $room = null, public Int $id = 0,
                                 public ?String $type = null, public ?String $comment = null) {
 
 		$this->db = $this->getDB();
