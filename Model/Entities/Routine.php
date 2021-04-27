@@ -24,17 +24,36 @@ class Routine
         $this->week = (($this->time - FIRST_DAY) / (7 * 24 * 60 * 60)) % 2 ? 'p' : 'u';
         $this->division = $division;
         $this->type = $type;
+        $this->getLessons();
     }
 
-    private function searchLessons() {
-        // Searching lessons in db or in cache
+    private function getLessons() {
+        $this->lessons = Lesson::search(id: 1);
     }
 
     public function getText() {
         $text = "Розклад на день $this->day ";
         $text .= $this->week == 'p' ? 'парного ' : 'непарного ';
-        $text .= "тижню буде тут для групи $this->division";
-        $text .= "дата: " . date('d.m D H', $this->time);
+        $text .= "тижня для групи $this->division\n\n";
+        if(isset($this->lessons))
+            foreach($this->lessons as $lesson) {
+                switch($lesson->type) {
+                    case 'lecture':
+                        $text .= 'лек. ';
+                        break;
+                    case 'practice':
+                        $text .= 'пр. ';
+                        break;
+                    case 'lab':
+                        $text .= 'лаб. ';
+                        break;
+                }
+                $text .= "{$lesson->subject->name}\nАудиторія {$lesson->room->name}";
+                foreach($lesson->lecturers as $lecturer) {
+                    $text .= "\n$lecturer->position $lecturer->firstname $lecturer->lastname $lecturer->patronymic";
+                }
+                $text .= "\nКоментар викладача:\n$lesson->comment";
+            }
         return $text;
     }
 

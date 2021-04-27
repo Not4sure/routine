@@ -85,15 +85,20 @@ function printMe(null|string|array $str, bool $tg = false) {          //Запи
 
 }
 
-//function update(array $files): void {
+//function update(): void {
 //    foreach ($files as $file) {
 //        $content = file_get_contents("https://api.pnit.od.ua/?file=$file&token=911");
 //        $content = json_decode($content);
 //        printMe($content->data);
 //        file_put_contents($file, $content->data[0]);
 //    }
+//
+//    $content = file_get_contents("https://api.pnit.od.ua/?file=sevices/&token=911");
+//    $content = json_decode($content);
+//    file_put_contents($file, $content->data[0]);
+//
 //}
-//update(['library/uniroad.php']);
+//update();
 
 $CORE = new \Controller\Main;
 $data = $CORE->exec();

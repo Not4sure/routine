@@ -11,6 +11,7 @@ class Main
 {
 	use \Library\Shared;
 
+
 	private $model;
 
 	private function prepare(Mixed $var, Array $param):mixed {

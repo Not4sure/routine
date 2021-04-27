@@ -8,12 +8,13 @@
  * @package Model\Main
  */
 namespace Model;
-use \Library\Uniroad;
+
 //use \Services\Uniroad;
 
 class Main
 {
 	use \Library\Shared;
+    use \Library\Uniroad;
 
 	private \Model\Services\Telegram $TG;
 
@@ -37,7 +38,7 @@ class Main
     }
 
     public function uniwebhook(String $type = '', String $value = '', Int $code = 0):?array {
-        $result = null;
+	    $result = null;
 
         $user = \Model\Entities\User::search(guid: $this->getVar('user'), limit: 1);
         if(!isset($user)) $user = new \Model\Entities\User(guid: $this->getVar('user'));
@@ -63,7 +64,11 @@ class Main
                 $message = \Model\Entities\Message::search(id: $code);
                 switch($message->type) {
                     case 0:
-                        // message
+                        $this->uni()->get('proxy', [
+                            'type' => $message,
+                            'value' => 'НЕ рабоТаЕт?',
+                            'to' => $user->guid,
+                        ], 'uni/push')->one();
                         break;
                     case 1:
                         $user->set(['context' => $message->id]);
@@ -87,6 +92,7 @@ class Main
                 ]
             ];
 
+        printMe($result);
         return $result;
     }
 

@@ -23,13 +23,14 @@ class Lesson {
             $class = __CLASS__;                                                                                 //класс lesson
             $lecturers = \Model\Entities\Lecturer::search(lesson: $lesson['id']);
             $groups = \Model\Entities\Division::search(lesson: $lesson['id']);
-            if(isset($lessons['room']))
-                $room = \Model\Entities\Room::search($lessons['room']);
+            if(isset($lesson['room']))
+                $room = \Model\Entities\Room::search($lesson['room'], limit: 1);
+            $subject = \Model\Entities\Subject::search($lesson['subject'], limit: 1);
 
-            $result[] = new $class($lecturers, $groups, $lesson['subject'], $lesson['week'], $lesson['day'], $lesson['number'],         //создаём экземпляр класса
+            $result[] = new $class($lecturers, $groups, $subject, $lesson['week'], $lesson['day'], $lesson['number'],         //создаём экземпляр класса
                 $room, $lesson['id'], $lesson['type'], $lesson['comment']);
         }
-        return $limit == 1 ? (isset($result[0]) ? $result[0] : null) : $result;
+        return $limit == 1 ? ($result[0] ?? null) : $result;
     }
 
     public function save():self {       
@@ -45,8 +46,8 @@ class Lesson {
 		return $this;
 	}
 
-    public function __construct(public array $lecturers, public array $groups, public String $subject, public String $week,
-                                public Int $day, public Int $number,  public ?String $room = null, public Int $id = 0,
+    public function __construct(public array $lecturers, public array $groups, public Subject $subject, public ?String $week,
+                                public Int $day, public Int $number,  public ?Room $room = null, public Int $id = 0,
                                 public ?String $type = null, public ?String $comment = null) {
 
 		$this->db = $this->getDB();

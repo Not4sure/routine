@@ -141,12 +141,10 @@ class Telegram
 //                        }
                         switch ($message->title) {
                             case 'Сьогодні' :
-                                $routine = new \Model\Entities\Routine('УП-191');
-                                $response = $routine->getText();
+                                $response = (new \Model\Entities\Routine('УП-191'))->getText();
                                 break;
                             case 'Завтра' :
-                                $routine = new \Model\Entities\Routine('УП-191', strtotime('+1 day'));
-                                $response = $routine->getText();
+                                $response = (new \Model\Entities\Routine('УП-191', strtotime('+1 day')))->getText();
                                 break;
                             default:
                                 $response = ($message->title ? '*' . $message->title . "*\n\n" : '') . $message->text;
