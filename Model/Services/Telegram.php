@@ -8,11 +8,10 @@
  * @package Model\Services
  */
 namespace Model\Services;
-use \Model\Entities\Routine;
-class Telegram
-{
-    use \Library\Shared;
 
+class Telegram{
+    use \Library\Shared;
+    use \Library\Uniroad;
 
     private ?Int $chat;
 

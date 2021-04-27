@@ -75,10 +75,10 @@ class Message
 		return $buttons ?  $buttons : [];
 	}
 
-	public function __construct(public Int $id = 0, public ?Int $parent = 0, public Int $type = 0, public ?String $guid = null,
-								public ?String $code = null, public ?String $title = null, public ?String $text = null,
-								public ?String $entrypoint = null, public Int $position = 0, public ?Int $service = null,
-								public ?Bool $reload = null) {
+	public function __construct(public int $id = 0, public ?int $parent = 0, public int $type = 0, public ?string $guid = null,
+								public ?string $code = null, public ?string $title = null, public ?string $text = null,
+								public ?string $entrypoint = null, public int $position = 0, public ?int $service = null,
+								public ?bool $reload = null) {
 		$this->db = $this->getDB();
 	}
 }

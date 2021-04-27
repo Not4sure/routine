@@ -44,6 +44,10 @@ class User
         return $this;
     }
 
+    public function setdivision(string $division) {
+        $this->set(['division' => $division]);
+    }
+
     public function __construct(public int $id = 0, public ?int $chat = null, public ?string $guid = null, public ?int $context = null,
                                 public ?int $service = null, public string|array|null $input = '', public ?string $division = null) {
         $this->db = $this->getDB();

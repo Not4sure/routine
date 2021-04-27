@@ -38,10 +38,10 @@ class Main
     }
 
     public function uniwebhook(String $type = '', String $value = '', Int $code = 0):?array {
-	    $result = null;
-
         $user = \Model\Entities\User::search(guid: $this->getVar('user'), limit: 1);
         if(!isset($user)) $user = new \Model\Entities\User(guid: $this->getVar('user'));
+
+//        printMe(['type' => $type, 'value' => $value, 'code' => $code]);
 
         if($type == 'message') {
             switch($value) {
@@ -50,8 +50,13 @@ class Main
                     break;
                 case '/start':
                     $user->set(['context' => 1]);
+                    break;
                 default:
-                    //И чЁ?
+                    $message = \Model\Entities\Message::search(id: $user->context, limit: 1);
+                    if($message->type == 2) {
+                        $user->{'set'. $message->code}($value);
+                    }
+                    $user->set(['context' => $message->parent ?? 1]);
             }
         } elseif($type == 'click') {
             if($code == 12345) { // Кнопка "назад"
@@ -61,12 +66,12 @@ class Main
                     // меняем контекст
                 }
             } else {
-                $message = \Model\Entities\Message::search(id: $code);
+                $message = \Model\Entities\Message::search(id: $code, limit: 1);
                 switch($message->type) {
                     case 0:
                         $this->uni()->get('proxy', [
                             'type' => $message,
-                            'value' => 'НЕ рабоТаЕт?',
+                            'value' => (new \Model\Entities\Routine('УП-191'))->getText(),
                             'to' => $user->guid,
                         ], 'uni/push')->one();
                         break;
@@ -74,7 +79,12 @@ class Main
                         $user->set(['context' => $message->id]);
                         break;
                     case 2:
-                        // question
+                        $user->set(['context' => $message->id]);
+                        $result = [
+                            'type' => 'message',
+                            'value' => $message->text,
+                            'to' => $user->guid,
+                        ];
                         break;
                 }
             }
@@ -84,7 +94,7 @@ class Main
         if(!isset($result))
             $result = [
                 'type' => 'message',
-                'value' => 'Розклад буде',
+                'value' => "Розклад буде",
                 'to' => $user->guid,
                 'keyboard' => [
                     'inline' => true,
@@ -92,7 +102,6 @@ class Main
                 ]
             ];
 
-        printMe($result);
         return $result;
     }
 
