@@ -9,10 +9,7 @@
  */
 namespace Model;
 
-//use \Services\Uniroad;
-
-class Main
-{
+class Main {
 	use \Library\Shared;
     use \Library\Uniroad;
 
@@ -41,52 +38,42 @@ class Main
         $user = \Model\Entities\User::search(guid: $this->getVar('user'), limit: 1);
         if(!isset($user)) $user = new \Model\Entities\User(guid: $this->getVar('user'));
 
+        if($value == '/start'){
+            $user->set(['context' => 1]);
+        }
+
+        $context = \Model\Entities\Message::search(id: $user->context, limit: 1);
 //        printMe(['type' => $type, 'value' => $value, 'code' => $code]);
 
+
         if($type == 'message') {
-            switch($value) {
-                case 'вийти':
-                    $result = ['type' => 'context', 'set' => null];
-                    break;
-                case '/start':
-                    $user->set(['context' => 1]);
-                    break;
-                default:
-                    $message = \Model\Entities\Message::search(id: $user->context, limit: 1);
-                    if($message->type == 2) {
-                        $user->{'set'. $message->code}($value);
-                    }
-                    $user->set(['context' => $message->parent ?? 1]);
+            if($context->type == 2) {
+                $this->{'set'. $context->code}($value);
+                $context = \Model\Entities\Message::search(id: $context->parent, limit: 1);
             }
         } elseif($type == 'click') {
             if($code == 12345) { // Кнопка "назад"
                 if($user->context == 1) {
                     $result = ['type' => 'context', 'set' => null];
                 } else {
-                    // меняем контекст
+                    $context = \Model\Entities\Message::search(id: $context->parent, limit: 1);
                 }
             } else {
-                $message = \Model\Entities\Message::search(id: $code, limit: 1);
-                switch($message->type) {
-                    case 0:
-                        $this->uni()->get('proxy', [
-                            'type' => $message,
-                            'value' => (new \Model\Entities\Routine('УП-191'))->getText(),
-                            'to' => $user->guid,
-                        ], 'uni/push')->one();
-                        break;
-                    case 1:
-                        $user->set(['context' => $message->id]);
-                        break;
-                    case 2:
-                        $user->set(['context' => $message->id]);
-                        $result = [
-                            'type' => 'message',
-                            'value' => $message->text,
-                            'to' => $user->guid,
-                        ];
-                        break;
-                }
+                $message = \Model\Entities\Message::search(id: $code, parent: $user->context, limit: 1);
+                if(isset($message))
+                    switch($message->type) {
+                        case 0:
+                            $this->uni()->get('proxy', [
+                                'type' => $message,
+                                'value' => (new \Model\Entities\Routine($user->division))->getText(),
+                                'to' => $user->guid,
+                            ], 'uni/push')->one();
+                            break;
+                        case 1:
+                        case 2:
+                            $context = $message;
+                            break;
+                    }
             }
         } else
             throw new \Exception('А какого, собственно, тип неправильный?', 5);
@@ -94,13 +81,15 @@ class Main
         if(!isset($result))
             $result = [
                 'type' => 'message',
-                'value' => "Розклад буде",
+                'value' => $context->text,
                 'to' => $user->guid,
                 'keyboard' => [
                     'inline' => true,
-                    'buttons' => \Model\Entities\Message::search(id: $user->context, limit: 1)->getKeyboard(uni: true, columns: 2)
+                    'buttons' => $context->getKeyboard(uni: true, columns: 2)
                 ]
             ];
+
+        $user->set(['context' => $context->id]);
 
         return $result;
     }

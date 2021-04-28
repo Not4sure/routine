@@ -67,7 +67,7 @@ class Message
             }
 		}
 		if($uni) $buttons[++$row] = [[
-		    $titleIndex => 'Вийти',
+		    $titleIndex => 'Повернутися',
             'id' => 12345
         ]];
 
