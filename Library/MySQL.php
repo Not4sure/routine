@@ -49,8 +49,7 @@ class MySQL {
 					$this -> filters = '';
 					$this -> order = [ '', 'ASC' ];
 					$result = true;
-			}
-			else {
+			} else {
 				if ( ! $this -> handler( $query ) )
 					throw new \Exception( 'INTERNAL_ERROR' );
 			}
@@ -169,10 +168,10 @@ class MySQL {
 	}
 
 
-	public function stack ( String $modificator = 'AND' ):self {
+	public function stack ( String $modifier = 'AND' ):self {
 
 		$this -> filters .= ( $this -> filters && ! $this -> brackets
-				? ( ( " $modificator (" ) )
+				? ( ( " $modifier (" ) )
 				: '' . ' (' );
 		$this -> brackets = true;
 		return $this;
@@ -263,11 +262,11 @@ class MySQL {
 		if ( $limit )
 			$sql .= " LIMIT $limit";
 
-		$this -> request( $sql );
+        $this -> request( $sql );
 		return $this -> result;
 	}
 
-	public function where ( Array $filters = [], String $modificator = 'AND' ):self {
+	public function where (Array $filters = [], String $modifier = 'AND', string $raw = ''):self {
 		/*
 		'table' => [
 			'column' => value
@@ -278,10 +277,12 @@ class MySQL {
 		$where = '';
 		foreach ( $filters as $table => $fields )
 			foreach ( $fields as $column => $value ) {
-				$where .= " $modificator `$db`.`$table`.`$column` = " . ( ( gettype( $value ) == 'string' && isset( $value[ 0 ] ) && $value[ 0 ] == '`' ) ? $value : "'$value'" );
+				$where .= " $modifier `$db`.`$table`.`$column` = ". ((gettype($value) == 'string' && isset($value[0])&&$value[0] == '`') ? $value : "'$value'");
 			}
+
+		$where .= $raw ? "$modifier $raw" : '';
 		if ( $where )
-			$this -> filters .= $this -> filters ? $where : substr( $where, strlen( $modificator ) + 1 );
+			$this -> filters .= $this -> filters ? $where : substr( $where, strlen( $modifier ) + 1 );
 		return $this;
 	}
 

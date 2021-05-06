@@ -35,37 +35,35 @@ class Main {
     }
 
     public function uniwebhook(String $type = '', String $value = '', Int $code = 0):?array {
-        $user = \Model\Entities\User::search(guid: $this->getVar('user'), limit: 1);
-        if(!isset($user)) $user = new \Model\Entities\User(guid: $this->getVar('user'));
+        $user = Entities\User::search(guid: $this->getVar('user'), limit: 1);
+        if(!isset($user)) $user = new Entities\User(guid: $this->getVar('user'));
 
         if($value == '/start'){
             $user->set(['context' => 1]);
         }
 
-        $context = \Model\Entities\Message::search(id: $user->context, limit: 1);
-//        printMe(['type' => $type, 'value' => $value, 'code' => $code]);
-
+        $context = Entities\Message::search(id: $user->context, limit: 1);
 
         if($type == 'message') {
             if($context->type == 2) {
-                $this->{'set'. $context->code}($value);
-                $context = \Model\Entities\Message::search(id: $context->parent, limit: 1);
+                $user->{'set'. $context->code}($value);
+                $context = Entities\Message::search(id: $context->parent, limit: 1);
             }
         } elseif($type == 'click') {
             if($code == 12345) { // Кнопка "назад"
                 if($user->context == 1) {
                     $result = ['type' => 'context', 'set' => null];
                 } else {
-                    $context = \Model\Entities\Message::search(id: $context->parent, limit: 1);
+                    $context = Entities\Message::search(id: $context->parent, limit: 1);
                 }
             } else {
-                $message = \Model\Entities\Message::search(id: $code, parent: $user->context, limit: 1);
+                $message = Entities\Message::search(id: $code, parent: $user->context, limit: 1);
                 if(isset($message))
                     switch($message->type) {
                         case 0:
                             $this->uni()->get('proxy', [
                                 'type' => $message,
-                                'value' => (new \Model\Entities\Routine($user->division))->getText(),
+                                'value' => (new Entities\Routine($user->division))->getText(),
                                 'to' => $user->guid,
                             ], 'uni/push')->one();
                             break;

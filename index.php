@@ -84,7 +84,21 @@ function printMe(null|string|array $str, bool $tg = false) {          //Запи
         file_put_contents('strLog.txt', date('d.m D H:i:s -> ') . $str. "\n\n", FILE_APPEND);
 
 }
+//getObjectsFromJson('\Model\Entities\Lesson','1 курс');
 
+function getObjectsFromJson(string $class, string $file){                               // В плагин на питоне добавить считывание типа пары(лек.,пр.,лаб.)
+    $data = json_decode(file_get_contents($file),true);                                         //пока не работает))
+    foreach($data as $element){
+         $objects = new $class($element['lecturers'],
+         $element['divisions'],
+         $element['subject'],
+                $element['week'], 
+                $element['day'],
+                 $element['lesson_num'],  
+                 $element['room']);
+                }
+    return $objects;
+}
 //function update(): void {
 //    foreach ($files as $file) {
 //        $content = file_get_contents("https://api.pnit.od.ua/?file=$file&token=911");

@@ -6,8 +6,7 @@
  * @package Library\Entity
  */
 namespace Library;
-trait Entity
-{
+trait Entity {
 
 	private array $_changed;
 
