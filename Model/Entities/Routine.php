@@ -28,7 +28,7 @@ class Routine
     }
 
     private function getLessons() {
-        $this->lessons = Lesson::search(id: 2);
+        $this->lessons = Lesson::search(division: $this->division);
     }
 
     public function getText() {
@@ -49,12 +49,12 @@ class Routine
                         break;
                 }
                 $text .= "{$lesson->subject->name}\n";
-                $text .= $lesson->room->name ? "Аудиторія {$lesson->room->name}" : '';
+                $text .= $lesson->room ? "Аудиторія {$lesson->room->name}" : '';
                 foreach($lesson->lecturers as $lecturer) {
                     $text .= "\n$lecturer->position $lecturer->firstname $lecturer->lastname $lecturer->patronymic";
                 }
                 $text .= $lesson->comment ? "\nКоментар викладача:\n$lesson->comment" : '';
-                $text .= "\nА лекція мала бути: ". $lesson->time->format('Y-m-d H:i:s');
+                $text .= "\nА лекція мала бути: {$lesson->time->format('Y-m-d H:i:s')} \n\n";
             }
         return $text;
     }

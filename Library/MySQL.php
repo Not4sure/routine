@@ -276,11 +276,10 @@ class MySQL {
 		$db = $this -> db;
 		$where = '';
 		foreach ( $filters as $table => $fields )
-			foreach ( $fields as $column => $value ) {
+			foreach ( $fields as $column => $value )
 				$where .= " $modifier `$db`.`$table`.`$column` = ". ((gettype($value) == 'string' && isset($value[0])&&$value[0] == '`') ? $value : "'$value'");
-			}
 
-		$where .= $raw ? "$modifier $raw" : '';
+		if($raw) $where .= "$modifier $raw";
 		if ( $where )
 			$this -> filters .= $this -> filters ? $where : substr( $where, strlen( $modifier ) + 1 );
 		return $this;

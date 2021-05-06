@@ -88,7 +88,6 @@ class Main {
             ];
 
         $user->set(['context' => $context->id]);
-
         return $result;
     }
 
