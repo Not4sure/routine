@@ -275,6 +275,7 @@ class MySQL {
 		 */
 		$db = $this -> db;
 		$where = '';
+
 		foreach ( $filters as $table => $fields )
 			foreach ( $fields as $column => $value )
 				$where .= " $modifier `$db`.`$table`.`$column` = ". ((gettype($value) == 'string' && isset($value[0])&&$value[0] == '`') ? $value : "'$value'");

@@ -143,7 +143,7 @@ class Telegram{
                                 $response = (new \Model\Entities\Routine('УП-191'))->getText();
                                 break;
                             case 'Завтра' :
-                                $response = (new \Model\Entities\Routine('УП-191', strtotime('+1 day')))->getText();
+                                $response = (new \Model\Entities\Routine('УП-191', new \DateTime('tomorrow')))->getText();
                                 break;
                             default:
                                 $response = ($message->title ? '*' . $message->title . "*\n\n" : '') . $message->text;

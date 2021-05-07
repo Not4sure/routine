@@ -44,7 +44,7 @@ class User
         return $this;
     }
 
-    public function setdivision(string $division) {
+    public function setDivision(string $division) {
         $this->set(['division' => $division]);
     }
 

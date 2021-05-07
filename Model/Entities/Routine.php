@@ -10,32 +10,32 @@ class Routine
     private string $type;
     private int $day;
     private string $week;
-    private array $lessons;
+    private ?array $lessons;
 
     /**
      * Routine constructor.
      * @param string $division
-     * @param Int $time
+     * @param \DateTime|null $time
      * @param string $type
      */
-    public function __construct(string $division, private int $time = 0, string $type = 'day') {
-        if($type = 'day' && $time == 0) $this->time = time();
-        $this->day = (int)date('N', $this->time);
-        $this->week = (($this->time - FIRST_DAY) / (7 * 24 * 60 * 60)) % 2 ? 'p' : 'u';
+    public function __construct(string $division, private ?\DateTime $time = null, string $type = 'day') {
+        if($type = 'day' && !$time) $this->time = new \DateTime('today');
+//        $this->day = (int)date('N', $this->time);
+//        $this->week = (($this->time - FIRST_DAY) / (7 * 24 * 60 * 60)) % 2 ? 'p' : 'u';
         $this->division = $division;
         $this->type = $type;
         $this->getLessons();
     }
 
     private function getLessons() {
-        $this->lessons = Lesson::search(division: $this->division);
+        $this->lessons = Lesson::search(division: $this->division, since: $this->time->getTimestamp(),
+            till: strtotime('tomorrow', $this->time->getTimestamp()));
     }
 
     public function getText() {
-        $text = "Розклад на день $this->day ";
-        $text .= $this->week == 'p' ? 'парного ' : 'непарного ';
-        $text .= "тижня для групи $this->division\n\n";
-        if(isset($this->lessons))
+        $text = "Розклад на {$this->time->format('d F')} ";
+        $text .= "для групи $this->division\n\n";
+        if(!empty($this->lessons))
             foreach($this->lessons as $lesson) {
                 switch($lesson->type) {
                     case 'lecture':
@@ -56,6 +56,8 @@ class Routine
                 $text .= $lesson->comment ? "\nКоментар викладача:\n$lesson->comment" : '';
                 $text .= "\nА лекція мала бути: {$lesson->time->format('Y-m-d H:i:s')} \n\n";
             }
+        else
+            $text .= 'А тут нічого немає. Так буває.';
         return $text;
     }
 

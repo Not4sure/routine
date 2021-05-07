@@ -14,8 +14,9 @@ class Main {
     use \Library\Uniroad;
 
 	private \Model\Services\Telegram $TG;
+    private ?Entities\User $user;
 
-	public function tgwebhook(string $token, string $input): ?array {
+    public function tgwebhook(string $token, string $input): ?array {
         if($token == $this->getVar('TG_TOKEN', 'e')) {
             $input = json_decode($input, true);
 
@@ -35,37 +36,37 @@ class Main {
     }
 
     public function uniwebhook(String $type = '', String $value = '', Int $code = 0):?array {
-        $user = Entities\User::search(guid: $this->getVar('user'), limit: 1);
-        if(!isset($user)) $user = new Entities\User(guid: $this->getVar('user'));
+        $this->user = Entities\User::search(guid: $this->getVar('user'), limit: 1);
+        if(!isset($this->user)) $this->user = new Entities\User(guid: $this->getVar('user'));
 
         if($value == '/start'){
-            $user->set(['context' => 1]);
+            $this->user->set(['context' => 1]);
         }
 
-        $context = Entities\Message::search(id: $user->context, limit: 1);
+        $context = Entities\Message::search(id: $this->user->context, limit: 1);
 
         if($type == 'message') {
             if($context->type == 2) {
-                $user->{'set'. $context->code}($value);
-                $context = Entities\Message::search(id: $context->parent, limit: 1);
+                try {
+                    $info = $this->{$context->code}($value);
+                    $context = Entities\Message::search(id: $context->parent, limit: 1);
+                } catch (\Exception $e)  {
+                    $info = $e->getMessage();
+                }
             }
         } elseif($type == 'click') {
             if($code == 12345) { // Кнопка "назад"
-                if($user->context == 1) {
-                    $result = ['type' => 'context', 'set' => null];
+                if($this->user->context == 1) {
+                    $interface = ['type' => 'context', 'set' => null];
                 } else {
                     $context = Entities\Message::search(id: $context->parent, limit: 1);
                 }
             } else {
-                $message = Entities\Message::search(id: $code, parent: $user->context, limit: 1);
+                $message = Entities\Message::search(id: $code, parent: $this->user->context, limit: 1);
                 if(isset($message))
                     switch($message->type) {
                         case 0:
-                            $this->uni()->get('proxy', [
-                                'type' => $message,
-                                'value' => (new Entities\Routine($user->division))->getText(),
-                                'to' => $user->guid,
-                            ], 'uni/push')->one();
+                            $info = $this->{$message->code}();
                             break;
                         case 1:
                         case 2:
@@ -76,22 +77,46 @@ class Main {
         } else
             throw new \Exception('А какого, собственно, тип неправильный?', 5);
 
-        if(!isset($result))
-            $result = [
+        if(!isset($interface))
+            $interface = [
                 'type' => 'message',
                 'value' => $context->text,
-                'to' => $user->guid,
+                'to' => $this->user->guid,
                 'keyboard' => [
                     'inline' => true,
                     'buttons' => $context->getKeyboard(uni: true, columns: 2)
                 ]
             ];
 
-        $user->set(['context' => $context->id]);
-        return $result;
+        if(isset($info))
+            $this->uni()->get('proxy', [
+                'type' => 'message',
+                'value' => $info,
+                'to' => $this->user->guid,
+            ], 'uni/push')->one();
+
+        $this->user->set(['context' => $context->id]);
+        return $interface;
     }
 
-    public function rotineget(string $user): array{
+    private function division(string $value):string {
+	    //Todo: проверка, сущетвует ли такая группа
+        if($value  == 'УП-191' || $value  == 'УП-192'){
+            $this->user->setDivision($value);
+        } else
+            throw new \Exception('Немає такої групи');
+        return "Обрано группу $value";
+    }
+
+    private function today():string {
+        return (new Entities\Routine($this->user->division))->getText();
+    }
+
+    private function tomorrow():string {
+        return (new Entities\Routine($this->user->division, time: new \DateTime('tomorrow')))->getText();
+    }
+
+    public function rotineget(string $user):array{
 	    return ['Тут буде розклад на тиждень'];
     }
 
