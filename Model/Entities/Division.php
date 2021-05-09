@@ -14,10 +14,10 @@ class Division {
         $db = self::getDB();
 
         foreach($db->select([
-            'Lesson_Division' => []
+            'LessonDivision' => []
         ])->where([
-            'Lesson_Division' => [
-                'lesson_id' => $lesson
+            'LessonDivision' => [
+                'lesson' => $lesson
             ]
         ])->many($limit) as $division) {
             $class = __CLASS__;

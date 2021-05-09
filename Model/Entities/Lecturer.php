@@ -24,10 +24,10 @@ class Lecturer {
         $result = [];
         $db = self::getDB();
         foreach($db->select([
-            'Lesson_Lecturer' => []
+            'LessonLecturer' => []
         ])->where([
-            'Lesson_Lecturer' => [
-                'lesson_id' => $lesson
+            'LessonLecturer' => [
+                'lesson' => $lesson
             ]
         ])->many($limit) as $lecturer) {
             $class = __CLASS__;

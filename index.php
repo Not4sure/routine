@@ -95,7 +95,7 @@ function getObjectsFromJson(string $class, string $file){                       
     return $objects;
 }
 
-getObjectsFromJson('\Model\Entities\Lesson','1 курс');
+// getObjectsFromJson('\Model\Entities\Lesson','1 курс');
 
 //function update(): void {
 //    foreach ($files as $file) {

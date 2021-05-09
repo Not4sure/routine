@@ -101,7 +101,7 @@ class Main {
 
     private function division(string $value):string {
 	    //Todo: проверка, сущетвует ли такая группа
-        if($value  == 'УП-191' || $value  == 'УП-192'){
+        if($value  == 'уп191' || $value  == 'УП-192'){
             $this->user->setDivision($value);
         } else
             throw new \Exception('Немає такої групи');

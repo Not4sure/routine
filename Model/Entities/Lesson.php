@@ -23,9 +23,11 @@ class Lesson {
                 if ($$var)
                     $filters[$var] = $$var;
             if($division)
-                $rawSql .= "AND `core`.`Lesson`.`id` in (SELECT `core`.`Lesson_Division`.`lesson_id` FROM `core`.`Lesson_Division` WHERE `core`.`Lesson_Division`.`division` = '$division')";
+                $rawSql .= "AND `core`.`Lesson`.`id` in (SELECT `core`.`LessonDivision`.`lesson` FROM 
+                    `core`.`LessonDivision` WHERE `core`.`LessonDivision`.`division` = 
+                        (SELECT `core`.`Division`.`id` FROM `core`.`Division` WHERE `core`.`Division`.`name` = '$division'))";
             if($lecturer)
-                $rawSql .= "AND `core`.`Lesson`.`id` in (SELECT `core`.`Lesson_Lecturer`.`lesson_id` FROM `core`.`Lesson_Lecturer` WHERE `core`.`Lesson_Lecturer`.`lecturer` = '$lecturer')";
+                $rawSql .= "AND `core`.`Lesson`.`id` in (SELECT `core`.`LessonLecturer`.`lesson` FROM `core`.`LessonLecturer` WHERE `core`.`LessonLecturer`.`lecturer` = '$lecturer')";
             if($since)
                 $rawSql .= "AND `core`.`Lesson`.`time` between from_unixtime($since) AND from_unixtime($till)";
         }
@@ -35,6 +37,7 @@ class Lesson {
         foreach($lessons->many($limit) as $lesson) {
             $class = __CLASS__;         //класс lesson
             $room = null;
+
 
             $lecturers = \Model\Entities\Lecturer::search(lesson: $lesson['id']);
             $divisions = \Model\Entities\Division::search(lesson: $lesson['id']);
@@ -59,12 +62,12 @@ class Lesson {
                 'time' => $this->time->format('Y-m-d H:i:s'),
                 'type' => $this->type,
 			];
-			if ($this->room) {
-				$insert['room'] = $this->room;
-			}
-            if ($this->comment) {
-				$insert['comment'] = $this->comment;
-			}        
+//			if ($this->room) {
+//				$insert['room'] = $this->room;
+//			}
+//            if ($this->comment) {
+//				$insert['comment'] = $this->comment;
+//			}
 			$this->id = $db -> insert([
 				'Lesson' => $insert
 			])->run(true)->storage['inserted'];;
