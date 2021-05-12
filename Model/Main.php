@@ -9,6 +9,8 @@
  */
 namespace Model;
 
+use Model\Entities\Division;
+
 class Main {
 	use \Library\Shared;
     use \Library\Uniroad;
@@ -35,7 +37,7 @@ class Main {
         return null;
     }
 
-    public function uniwebhook(String $type = '', String $value = '', Int $code = 0):?array {
+    public function uniwebhook(string $type = '', string $value = '', int $code = 0):?array {
         $this->user = Entities\User::search(guid: $this->getVar('user'), limit: 1);
         if(!isset($this->user)) $this->user = new Entities\User(guid: $this->getVar('user'));
 
@@ -100,8 +102,9 @@ class Main {
     }
 
     private function division(string $value):string {
-	    //Todo: проверка, сущетвует ли такая группа
-        if($value  == 'уп191' || $value  == 'УП-192'){
+        $value = mb_strtoupper($value);
+
+        if(in_array($value, Division::getDivisions())){
             $this->user->setDivision($value);
         } else
             throw new \Exception('Немає такої групи');
@@ -114,6 +117,10 @@ class Main {
 
     private function tomorrow():string {
         return (new Entities\Routine($this->user->division, time: new \DateTime('tomorrow')))->getText();
+    }
+
+    private function full():string {
+        return 'Цю штуку ще не завезли)';
     }
 
     public function rotineget(string $user):array{

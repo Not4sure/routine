@@ -8,6 +8,7 @@ class Subject {
 
     public function __construct(public string $guid, public string $name){}
 
+    // Todo: дописать
     public static function search(string $guid,  int $limit = 0): self|array|null {
         $result = [];
 

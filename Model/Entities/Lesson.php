@@ -37,41 +37,61 @@ class Lesson {
         foreach($lessons->many($limit) as $lesson) {
             $class = __CLASS__;         //класс lesson
             $room = null;
+            $lecturers = [];
+            $divisions = [];
 
+            foreach($db->select(['LessonDivision' => ['division']])->where(['LessonDivision' => ['lesson' => $lesson['id']]]) as $query)
+                $divisions[] = Division::search(id: $query['division']);
 
-            $lecturers = \Model\Entities\Lecturer::search(lesson: $lesson['id']);
-            $divisions = \Model\Entities\Division::search(lesson: $lesson['id']);
-            $subject = \Model\Entities\Subject::search($lesson['subject'], limit: 1);
+            foreach($db->select(['LessonLecturer' => ['lecturer']])->where(['LessonLecturer' => ['lesson' => $lesson['id']]]) as $query)
+                $lecturers[] = Lecturer::search(guid: $query['lecturer']);
+
+            $subject = Subject::search(guid: $lesson['subject'], limit: 1);
 
             $time = date_create_from_format('Y-m-d H:i:s', $lesson['time']);
             if($lesson['room'])
-                $room = \Model\Entities\Room::search($lesson['room'], limit: 1);
+                $room = Room::search(guid: $lesson['room'], limit: 1);
 
-            $result[] = new $class($lecturers, $divisions, $subject, $time,         //создаём экземпляр класса
+            $result[] = new $class($lecturers, $divisions, $subject, $time,
                 $room, $lesson['id'], $lesson['type'], $lesson['comment']);
         }
         return $limit == 1 ? ($result[0] ?? null) : $result;
     }
 
-    // Todo: переделать для нормального сохранения с учетом изменений в бд
     public function save():self {       
 		$db = $this->db;
+		// If there's no such entity in db
 		if(!$this->id) {
             $insert = [
-				'subject' => $this->subject,
+				'subject' => $this->subject->guid,
                 'time' => $this->time->format('Y-m-d H:i:s'),
                 'type' => $this->type,
+                'comment' => $this->comment,
+                'room' => $this->room->guid
 			];
-//			if ($this->room) {
-//				$insert['room'] = $this->room;
-//			}
-//            if ($this->comment) {
-//				$insert['comment'] = $this->comment;
-//			}
-			$this->id = $db -> insert([
-				'Lesson' => $insert
-			])->run(true)->storage['inserted'];;
+            $this->id = $db -> insert([
+                'Lesson' => $insert
+            ])->run(true)->storage['inserted'];
+
+            foreach($this->divisions as $division) {
+                $db -> insert([
+                    'LessonDivision' => [
+                        'lesson' => $this->id,
+                        'division' => $division->id
+                    ]
+                ])->run();
+            }
+            foreach($this->lecturers as $lecturer) {
+                $db -> insert([
+                    'LessonLecturer' => [
+                        'lesson' => $this->id,
+                        'lecturer' => $lecturer->guid
+                    ]
+                ])->run();
+            }
         }
+
+		// Todo: тут надо доделать
         if ($this->_changed)
 			$db -> update('Lesson', $this->_changed )
 				-> where(['Lesson'=> ['id' => $this->id]])
@@ -83,10 +103,5 @@ class Lesson {
                                 public \DateTime $time, public ?Room $room = null, public Int $id = 0,
                                 public ?string $type = null, public ?string $comment = null) {
 		$this->db = $this->getDB();
-        // if(!$this->db){
-            
-        //     $this->lecturers = $lecturers;
-        //     $this->$groups = $groups;
-        // }
 	}
 }

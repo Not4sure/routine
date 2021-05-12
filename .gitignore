@@ -3,5 +3,8 @@
 # phpMyAdmin files
 db/
 
+# data files
+data/
+
 # any logs
 *Log.*

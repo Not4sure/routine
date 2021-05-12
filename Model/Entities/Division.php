@@ -7,21 +7,28 @@ class Division {
     use \Library\Entity;
     use \Library\Shared;
 
-    public function __construct(public string $guid, public string $name){}
+    public function __construct(public int $id, public string $name){}
 
-    public static function search(string $lesson,  int $limit = 0): self|array|null {
+    public static function getDivisions() {
         $result = [];
-        $db = self::getDB();
+        foreach(self::getDB()->select(['Division' => ['name']])->many() as $division) {
+            $result[] = $division['name'];
+        }
+        return $result;
+    }
 
-        foreach($db->select([
-            'LessonDivision' => []
-        ])->where([
-            'LessonDivision' => [
-                'lesson' => $lesson
-            ]
-        ])->many($limit) as $division) {
+    public static function search(int $id = 0, string $name = '', int $limit = 0): self|array|null {
+        $result = [];
+        $request = self::getDB()->select(['Division' => []]);
+        $query = [];
+
+        $filter = $id ? 'id' : ($name ? 'name' : null);
+
+        if($filter) $query = $request->where(['Division' =>[$filter => $$filter]])->many();
+
+        foreach($query as $division) {
             $class = __CLASS__;
-            $result[] = new $class($division['division'], 'УП-191');
+            $result[] = new $class($division['id'], $division['name']);
         }
 
         return $limit == 1 ? (isset($result[0]) ? $result[0] : null) : $result;

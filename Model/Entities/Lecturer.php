@@ -20,19 +20,14 @@ class Lecturer {
                                 public string $lastname, public string $patronymic, public string $position) {
     }
 
-    public static function search(int $lesson, int $limit = 0):self|array|null {
+
+    // Todo: дописать
+    public static function search(string $guid, int $limit = 0):self|array|null {
         $result = [];
-        $db = self::getDB();
-        foreach($db->select([
-            'LessonLecturer' => []
-        ])->where([
-            'LessonLecturer' => [
-                'lesson' => $lesson
-            ]
-        ])->many($limit) as $lecturer) {
-            $class = __CLASS__;
-            $result[] = new $class($lecturer['lecturer'], 'Микола', 'Годовиченко', 'Анатолієвич', 'стример');
-        }
+
+        $class = __CLASS__;
+        $result[] = new $class($guid, 'Микола', 'Годовиченко', 'Анатолієвич', 'стример');
+
 
         return $limit == 1 ? (isset($result[0]) ? $result[0] : null) : $result;
     }

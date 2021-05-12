@@ -85,12 +85,17 @@ function printMe(null|string|array $str, bool $tg = false) {          //Запи
 
 }
 
-function getObjectsFromJson(string $class, string $file){                               // В плагин на питоне добавить считывание типа пары(лек.,пр.,лаб.)
+function getLessonsFromJson(string $file){                               // В плагин на питоне добавить считывание типа пары(лек.,пр.,лаб.)
     $data = json_decode(file_get_contents($file),true);                                         //пока не работает))
     foreach($data as $element){
-         $objects = new $class($element['lecturers'],
-            $element['divisions'], $element['subject'],
-             $element['room']);
+        $lecturers = [];
+        foreach($element['lecturers'] as $name) {
+            // Внимание, временный костыль!
+            $lecturer = \Model\Entities\Lecturer::search(guid: $name);
+            if(!$lecturer) $lecturer = new \Model\Entities\Lecturer($name, 'f', 'F', 'f', 'F');
+            $lecturers[] = $lecturer;
+        }
+        $lesson = new \Model\Entities\Lesson($lecturers, );
     }
     return $objects;
 }
