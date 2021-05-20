@@ -31,7 +31,25 @@ class Division {
             $result[] = new $class($division['id'], $division['name']);
         }
 
-        return $limit == 1 ? (isset($result[0]) ? $result[0] : null) : $result;
+        return $limit == 1 ? ($result[0] ?? null) : $result;
+    }
+
+    public function save(): self {
+        $db = $this->getDB();
+
+        if(!$this->id){
+            $this->id = $db->insert([
+                'Division' => [
+                    'name' => $this->name
+                ]
+            ])->run(true)->storage['inserted'];
+        }
+        if($this->_changed) {
+            $db -> update('Division', $this->_changed )
+                -> where(['Division'=> ['id' => $this->id]])
+                -> run();
+        }
+        return $this;
     }
 
 }

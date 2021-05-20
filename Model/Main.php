@@ -79,6 +79,7 @@ class Main {
         } else
             throw new \Exception('А какого, собственно, тип неправильный?', 5);
 
+        // Отправка сообщения-интерфейса
         if(!isset($interface))
             $interface = [
                 'type' => 'message',
@@ -90,6 +91,7 @@ class Main {
                 ]
             ];
 
+        // Отправка сообщения с информацией
         if(isset($info))
             $this->uni()->get('proxy', [
                 'type' => 'message',
@@ -98,6 +100,7 @@ class Main {
             ], 'uni/push')->one();
 
         $this->user->set(['context' => $context->id]);
+        $this->user->save();
         return $interface;
     }
 

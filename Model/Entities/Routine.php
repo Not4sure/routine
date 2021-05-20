@@ -37,21 +37,16 @@ class Routine
         $text .= "для групи $this->division\n\n";
         if(!empty($this->lessons))
             foreach($this->lessons as $lesson) {
-                switch($lesson->type) {
-                    case 'lecture':
-                        $text .= 'лек. ';
-                        break;
-                    case 'practice':
-                        $text .= 'пр. ';
-                        break;
-                    case 'lab':
-                        $text .= 'лаб. ';
-                        break;
-                }
+                $text .= match($lesson->type) {
+                    'lecture' => 'лек. ',
+                    'practice' => 'пр. ',
+                    'lab' => 'лаб. ',
+                };
                 $text .= "{$lesson->subject->name}\n";
-                $text .= $lesson->room ? "Аудиторія {$lesson->room->name}" : '';
+                $text .= $lesson->room ? "Аудиторія {$lesson->room->name}\n" : "\n";
+
                 foreach($lesson->lecturers as $lecturer) {
-                    $text .= "\n$lecturer->position $lecturer->firstname $lecturer->lastname $lecturer->patronymic";
+                    $text .= $lecturer ? "\n$lecturer->position $lecturer->firstname $lecturer->lastname $lecturer->patronymic" : 'Error blyat';
                 }
                 $text .= $lesson->comment ? "\nКоментар викладача:\n$lesson->comment" : '';
                 $text .= "\nА лекція мала бути: {$lesson->time->format('Y-m-d H:i:s')} \n\n";

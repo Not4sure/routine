@@ -16,20 +16,20 @@ class Lecturer {
      * @param string $patronymic
      * @param string $position
      */
-    public function __construct(private string $guid, public string $firstname,
-                                public string $lastname, public string $patronymic, public string $position) {
+    public function __construct(private string $id, public string $firstname,
+                                public string $lastname, public string $patronymic, public string $position, private string $guid = '') {
     }
 
 
     // Todo: дописать
-    public static function search(string $guid, int $limit = 0):self|array|null {
+    public static function search(int $id, int $limit = 0):self|array|null {
         $result = [];
 
         $class = __CLASS__;
-        $result[] = new $class($guid, 'Микола', 'Годовиченко', 'Анатолієвич', 'стример');
+        $result[] = new $class($id, 'Микола', 'Годовиченко', 'Анатолієвич', 'стример');
 
 
-        return $limit == 1 ? (isset($result[0]) ? $result[0] : null) : $result;
+        return $limit == 1 ? ($result[0] ?? null) : $result;
     }
 
 }

@@ -12,10 +12,9 @@ trait Entity {
 
 	public function set(Array $fields):self {
 		foreach ($fields as $field => $value) {
-			$this->_changed[$field] = gettype($value) == 'array' ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value;
+			$this->_changed[$field] = $value;
 			$this->$field = $value;
 		}
-		$this->save();
 		return $this;
 	}
 }

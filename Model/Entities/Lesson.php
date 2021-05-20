@@ -5,9 +5,9 @@ class Lesson {
     use \Library\Shared;
 	use \Library\Entity;
 
-    public static function search(Int $id = 0, ?String $room = null, ?String $subject = null,
+    public static function search(Int $id = 0, ?string $room = null, ?string $subject = null,
                                   ?string $division = null, int $since = 0, int $till = 0,
-                                  ?string $lecturer = null, ?String $type = null, Int $limit = 0):self|array|null{
+                                  ?string $lecturer = null, ?string $type = null, Int $limit = 0):self|array|null{
         
         $result = [];
         $rawSql = '';
@@ -27,7 +27,9 @@ class Lesson {
                     `core`.`LessonDivision` WHERE `core`.`LessonDivision`.`division` = 
                         (SELECT `core`.`Division`.`id` FROM `core`.`Division` WHERE `core`.`Division`.`name` = '$division'))";
             if($lecturer)
-                $rawSql .= "AND `core`.`Lesson`.`id` in (SELECT `core`.`LessonLecturer`.`lesson` FROM `core`.`LessonLecturer` WHERE `core`.`LessonLecturer`.`lecturer` = '$lecturer')";
+               $rawSql .= "AND `core`.`Lesson`.`id` in (SELECT `core`.`LessonLecturer`.`lesson` FROM 
+                    `core`.`LessonLecturer` WHERE `core`.`LessonLecturer`.`lecturer` = 
+                        (SELECT `core`.`Lecturer`.`id` FROM `core`.`Lecturer` WHERE `core`.`Lecturer`.`guid` = '$lecturer'))";
             if($since)
                 $rawSql .= "AND `core`.`Lesson`.`time` between from_unixtime($since) AND from_unixtime($till)";
         }
@@ -40,11 +42,11 @@ class Lesson {
             $lecturers = [];
             $divisions = [];
 
-            foreach($db->select(['LessonDivision' => ['division']])->where(['LessonDivision' => ['lesson' => $lesson['id']]]) as $query)
-                $divisions[] = Division::search(id: $query['division']);
+            foreach($db->select(['LessonDivision' => ['division']])->where(['LessonDivision' => ['lesson' => $lesson['id']]])->many() as $query)
+                $divisions[] = Division::search(id: $query['division'], limit: 1);
 
-            foreach($db->select(['LessonLecturer' => ['lecturer']])->where(['LessonLecturer' => ['lesson' => $lesson['id']]]) as $query)
-                $lecturers[] = Lecturer::search(guid: $query['lecturer']);
+            foreach($db->select(['LessonLecturer' => ['lecturer']])->where(['LessonLecturer' => ['lesson' => $lesson['id']]])->many() as $query)
+                $lecturers[] = Lecturer::search(id: $query['lecturer'], limit: 1);
 
             $subject = Subject::search(guid: $lesson['subject'], limit: 1);
 
