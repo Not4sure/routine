@@ -46,7 +46,7 @@ class Routine
                 $text .= $lesson->room ? "Аудиторія {$lesson->room->name}\n" : "\n";
 
                 foreach($lesson->lecturers as $lecturer) {
-                    $text .= $lecturer ? "\n$lecturer->position $lecturer->firstname $lecturer->lastname $lecturer->patronymic" : 'Error blyat';
+                    $text .= "\n$lecturer->position $lecturer->firstname $lecturer->lastname $lecturer->patronymic";
                 }
                 $text .= $lesson->comment ? "\nКоментар викладача:\n$lesson->comment" : '';
                 $text .= "\nА лекція мала бути: {$lesson->time->format('Y-m-d H:i:s')} \n\n";

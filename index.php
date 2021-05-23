@@ -13,6 +13,7 @@ $RESULT = [
     'message' => 'ok'
 ];
 
+// <editor-fold defaultstate="collapsed" desc="Environment setup">
 /* ENVIRONMENT SETUP */
 define('ROOT', $_SERVER['DOCUMENT_ROOT'] . '/'); // Unity entrypoint;
 
@@ -21,7 +22,9 @@ spl_autoload_register('load'); // Class autoloader
 register_shutdown_function('shutdown', 'OK'); // Unity shutdown function
 
 set_exception_handler('handler'); // Handle all errors in one function
+// </editor-fold>
 
+//<editor-fold desc="Handlers">
 /* HANDLERS */
 
 /*
@@ -72,6 +75,7 @@ function handler (Throwable $e):void {
 
 //    (new Model\Services\Telegram($_SERVER['TG_TOKEN'], emergency: 165091981))->alert('errors: '. $errors);
 }
+//</editor-fold>
 
 function printMe(null|string|array $str, bool $tg = false) {          //Запись str в файл strLog.txt
     if($str === null)

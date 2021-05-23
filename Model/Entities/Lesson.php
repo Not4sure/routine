@@ -94,15 +94,29 @@ class Lesson {
         }
 
 		// Todo: тут надо доделать
-        if ($this->_changed)
-			$db -> update('Lesson', $this->_changed )
-				-> where(['Lesson'=> ['id' => $this->id]])
-				-> run();
+        foreach (['lecturer', 'division'] as $index){
+            $field = $index. 's';
+            if(isset($this->_changed[$field])){
+                $table = 'Lesson'. ucfirst($index);
+                $db->delete($table)->where(filters: [$table => [$index => $this->id]])->run();
+                foreach($this->_changed[$field] as $entity)
+                    $db->insert([$table => [
+                        'lesson' => $this->id,
+                        $index => $entity->id
+                    ]]);
+                unset($this->_changed[$field]);
+            }
+        }
+        if($this->_changed && !empty($this->_changed)){
+            $db -> update('Lesson', $this->_changed )
+                -> where(['Lesson'=> ['id' => $this->id]])
+                -> run();
+        }
 		return $this;
 	}
 
     public function __construct(public array $lecturers, public array $divisions, public Subject $subject,
-                                public \DateTime $time, public ?Room $room = null, public Int $id = 0,
+                                public \DateTime $time, public ?Room $room = null, public int $id = 0,
                                 public ?string $type = null, public ?string $comment = null) {
 		$this->db = $this->getDB();
 	}

@@ -16,7 +16,7 @@ class Lecturer {
      * @param string $patronymic
      * @param string $position
      */
-    public function __construct(private string $id, public string $firstname,
+    public function __construct(public string $id, public string $firstname,
                                 public string $lastname, public string $patronymic, public string $position, private string $guid = '') {
     }
 

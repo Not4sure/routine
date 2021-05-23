@@ -16,9 +16,9 @@ class Message
 	use \Library\Entity;
 
 	public static function search(Int $id = 0, ?Int $parent = 0, Int $type = 0, ?String $guid = null,
-		?String $code = null, ?String $title = null, ?String $text = null,
-		?String $entrypoint = null, Int $position = 0, ?Int $service = null,
-		?Bool $reload = null, Int $limit = 0):self|array|null {
+                                  ?String $function = null, ?String $title = null, ?String $text = null,
+                                  ?String $entrypoint = null, Int $position = 0, ?Int $service = null,
+                                  ?Bool $reload = null, Int $limit = 0):self|array|null {
 		$result = [];
 		$db = self::getDB();
 		$messages = $db -> select(['Messages' => []]);
@@ -32,7 +32,7 @@ class Message
 		foreach ($messages->many($limit) as $message) {
 			$class = __CLASS__;
 			$result[] = new $class($message['id'], $message['parent'], $message['type'], $message['guid'],
-				$message['code'], $message['title'], $message['text'], $message['entrypoint'],
+				$message['function'], $message['title'], $message['text'], $message['entrypoint'],
 				$message['position'], $message['service'], $message['reload']);
 		}
 		return $limit == 1 ? (isset($result[0]) ? $result[0] : null) : $result;
@@ -76,9 +76,9 @@ class Message
 	}
 
 	public function __construct(public int $id = 0, public ?int $parent = 0, public int $type = 0, public ?string $guid = null,
-								public ?string $code = null, public ?string $title = null, public ?string $text = null,
-								public ?string $entrypoint = null, public int $position = 0, public ?int $service = null,
-								public ?bool $reload = null) {
+                                public ?string $function = null, public ?string $title = null, public ?string $text = null,
+                                public ?string $entrypoint = null, public int $position = 0, public ?int $service = null,
+                                public ?bool $reload = null) {
 		$this->db = $this->getDB();
 	}
 }

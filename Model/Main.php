@@ -12,10 +12,10 @@ namespace Model;
 use Model\Entities\Division;
 
 class Main {
-	use \Library\Shared;
+    use \Library\Shared;
     use \Library\Uniroad;
 
-	private \Model\Services\Telegram $TG;
+    private \Model\Services\Telegram $TG;
     private ?Entities\User $user;
 
     public function tgwebhook(string $token, string $input): ?array {
@@ -68,7 +68,7 @@ class Main {
                 if(isset($message))
                     switch($message->type) {
                         case 0:
-                            $info = $this->{$message->code}();
+                            $info = $this->{$message->function}();
                             break;
                         case 1:
                         case 2:
@@ -123,21 +123,25 @@ class Main {
     }
 
     private function full():string {
+        $lesson = Entities\Lesson::search(id: 2, limit: 1);
+//        $lecturers = $lesson->lecturers;
+//        $lecturers[] = Lecturer::search(id: 1, limit: 1);
+        $lesson->set([/*'lecturers' => $lecturers, 'divisions' => Division::search(id: 1),*/ 'time' => new \DateTime('now')])->save();
         return 'Цю штуку ще не завезли)';
     }
 
     public function rotineget(string $user):array{
-	    return ['Тут буде розклад на тиждень'];
+        return ['Тут буде розклад на тиждень'];
     }
 
-	public function __construct() {
+    public function __construct() {
         $this->db = new \Library\MySQL('core',
             \Library\MySQL::connect(
                 $this->getVar('DB_HOST', 'e'),
                 $this->getVar('DB_USER', 'e'),
                 $this->getVar('DB_PASS', 'e')
             ) );
-		$this->setDB($this->db);
+        $this->setDB($this->db);
         $this -> TG = new Services\Telegram(key: $this->getVar('TG_TOKEN', 'e'), emergency: 165091981);
-	}
+    }
 }

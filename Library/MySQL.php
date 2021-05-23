@@ -315,5 +315,17 @@ class MySQL {
 		return $this;
 	}
 
+    public function delete(string $tables):self {
+        /*
+        'table'
+        DELETE FROM `table`
+         */
+        $db = $this -> db;
+
+        $this -> sql = "DELETE FROM $tables";
+
+        return $this;
+    }
+
     public function __construct ( private String $db, private \MySQLi $connection ) {}
 }
