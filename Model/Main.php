@@ -125,9 +125,9 @@ class Main {
 
     private function full():string {
         $lesson = Entities\Lesson::search(id: 2, limit: 1);
-//        $lecturers = $lesson->lecturers;
-//        $lecturers[] = Lecturer::search(id: 1, limit: 1);
-        $lesson->set([/*'lecturers' => $lecturers, 'divisions' => Division::search(id: 1),*/ 'time' => new \DateTime('now')])->save();
+        $lecturers = $lesson->lecturers;
+        $lecturers[] = Entities\Lecturer::search(id: 1, limit: 1);
+        $lesson->set(['lecturers' => $lecturers, 'divisions' => Division::search(id: 1), /*'time' => new \DateTime('now')*/])->save();
 //        $this->insertLessons(file_get_contents(ROOT. 'data/sample'));
         return 'Цю штуку ще не завезли)';
     }

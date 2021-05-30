@@ -216,8 +216,13 @@ class MySQL {
 		$db = $this -> db;
 		$update = '';
 		$table = "`$db`.`$table`";
-		foreach ( $fields as $key => $field )
-			$update .= ",$table.`$key` = " . ( $field !== null ? "'$field'" : 'null' );
+		foreach ( $fields as $key => $field ) {
+            if(gettype($field) === 'object' && get_class($field) === 'DateTime')
+                $update .= ",$table.`$key` = " . ( $field !== null ? "from_unixtime({$field->getTimestamp()})" : 'null' );
+            else
+                $update .= ",$table.`$key` = " . ( $field !== null ? "'$field'" : 'null' );
+
+        }
 		if ( $update )
 			$update = substr( $update, 1 );
 
@@ -322,7 +327,7 @@ class MySQL {
          */
         $db = $this -> db;
 
-        $this -> sql = "DELETE FROM $tables";
+        $this -> sql = "DELETE FROM `$db`.`$tables`";
 
         return $this;
     }
