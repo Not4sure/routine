@@ -1,12 +1,12 @@
 <?php
 $methods = [
-  'getCourses' => [
-      'params' => [
-          [
-              'name' => 'user',
-              'source' => 'p',
-              'required' => false
-          ]
-      ]
-  ]
+    'getCourses' => [
+        'params' => [
+            [
+                'name' => 'user',
+                'source' => 'p',
+                'required' => false
+            ]
+        ]
+    ]
 ];

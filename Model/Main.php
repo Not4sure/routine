@@ -10,6 +10,7 @@
 namespace Model;
 
 use Model\Entities\Division;
+use Model\Entities\Lesson;
 
 class Main {
     use \Library\Shared;
@@ -127,11 +128,21 @@ class Main {
 //        $lecturers = $lesson->lecturers;
 //        $lecturers[] = Lecturer::search(id: 1, limit: 1);
         $lesson->set([/*'lecturers' => $lecturers, 'divisions' => Division::search(id: 1),*/ 'time' => new \DateTime('now')])->save();
+//        $this->insertLessons(file_get_contents(ROOT. 'data/sample'));
         return 'Цю штуку ще не завезли)';
     }
 
     public function rotineget(string $user):array{
         return ['Тут буде розклад на тиждень'];
+    }
+
+    public function insertLessons(string $lessons):bool {
+        $lessons = json_decode($lessons, true);
+        foreach($lessons as $lesson) {
+            new Lesson();
+
+        }
+        return true;
     }
 
     public function __construct() {

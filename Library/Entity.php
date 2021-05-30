@@ -15,7 +15,7 @@ trait Entity {
 
 			$this->_changed[$field] = gettype($value) == 'object' ? match(get_class($value)) {
 			    'Subject', 'Room' => $value->guid,
-                '\Datetime' => "from_unixtime({$value->getTimestamp()})",
+                'DateTime' => "from_unixtime({$value->getTimestamp()})",
                 default => $value
             } : $value;
 			$this->$field = $value;

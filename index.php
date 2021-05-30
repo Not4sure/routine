@@ -87,25 +87,7 @@ function printMe(null|string|array $str, bool $tg = false) {          //Запи
         (new Model\Services\Telegram($_SERVER['TG_TOKEN'], emergency: 165091981))->alert($str);
     else
         file_put_contents('strLog.txt', date('d.m D H:i:s -> ') . $str. "\n\n", FILE_APPEND);
-
 }
-
-//function getLessonsFromJson(string $file){                               // В плагин на питоне добавить считывание типа пары(лек.,пр.,лаб.)
-//    $data = json_decode(file_get_contents($file),true);                                         //пока не работает))
-//    foreach($data as $element){
-//        $lecturers = [];
-//        foreach($element['lecturers'] as $name) {
-//            // Внимание, временный костыль!
-//            $lecturer = \Model\Entities\Lecturer::search(guid: $name);
-//            if(!$lecturer) $lecturer = new \Model\Entities\Lecturer($name, 'f', 'F', 'f', 'F');
-//            $lecturers[] = $lecturer;
-//        }
-//        $lesson = new \Model\Entities\Lesson($lecturers, );
-//    }
-//    return $objects;
-//}
-
-// getObjectsFromJson('\Model\Entities\Lesson','1 курс');
 
 // function update(): void {
 //    foreach ($files as $file) {
@@ -118,7 +100,6 @@ function printMe(null|string|array $str, bool $tg = false) {          //Запи
 //    $content = file_get_contents("https://api.pnit.od.ua/?file=sevices/&token=911");
 //    $content = json_decode($content);
 //    file_put_contents($file, $content->data[0]);
-
 // }
 // update();
 
