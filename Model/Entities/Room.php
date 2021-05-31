@@ -13,7 +13,7 @@ class Room {
         $result = [];
 
         $class = __CLASS__;
-        $result[] = new $class($guid, '401ф');
+        $result[] = new $class($guid, $guid);
 
         return $limit == 1 ? (isset($result[0]) ? $result[0] : null) : $result;
     }

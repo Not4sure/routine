@@ -33,7 +33,7 @@ class Routine
     }
 
     public function getText() {
-        $text = "Розклад на {$this->time->format('d F')} ";
+        $text = "Розклад на {$this->time->format('d.m')} ";
         $text .= "для групи $this->division\n\n";
         if(!empty($this->lessons))
             foreach($this->lessons as $lesson) {
@@ -43,13 +43,12 @@ class Routine
                     'lab' => 'лаб. ',
                 };
                 $text .= "{$lesson->subject->name}\n";
-                $text .= $lesson->room ? "Аудиторія {$lesson->room->name}\n" : "\n";
+                $text .= $lesson->room ? "Аудиторія {$lesson->room->name}\n" : '';
 
-                foreach($lesson->lecturers as $lecturer) {
-                    $text .= "\n$lecturer->position $lecturer->firstname $lecturer->lastname $lecturer->patronymic";
-                }
+                if(isset($lesson->lecturers))
+                    foreach($lesson->lecturers as $lecturer)
+                        $text .= "\n$lecturer->guid\n";
                 $text .= $lesson->comment ? "\nКоментар викладача:\n$lesson->comment" : '';
-                $text .= "\nА лекція мала бути: {$lesson->time->format('Y-m-d H:i:s')} \n\n";
             }
         else
             $text .= 'А тут нічого немає. Так буває.';

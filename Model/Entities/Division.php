@@ -7,7 +7,7 @@ class Division {
     use \Library\Entity;
     use \Library\Shared;
 
-    public function __construct(public int $id, public string $name){}
+    public function __construct(public string $name, public int $id = 0){}
 
     public static function getDivisions() {
         $result = [];
@@ -24,11 +24,11 @@ class Division {
 
         $filter = $id ? 'id' : ($name ? 'name' : null);
 
-        if($filter) $query = $request->where(['Division' =>[$filter => $$filter]])->many();
+        if($filter) $query = $request->where(['Division' => [$filter => $$filter]])->many();
 
         foreach($query as $division) {
             $class = __CLASS__;
-            $result[] = new $class($division['id'], $division['name']);
+            $result[] = new $class($division['name'], $division['id']);
         }
 
         return $limit == 1 ? ($result[0] ?? null) : $result;
@@ -43,8 +43,7 @@ class Division {
                     'name' => $this->name
                 ]
             ])->run(true)->storage['inserted'];
-        }
-        if($this->_changed) {
+        } else {
             $db -> update('Division', $this->_changed )
                 -> where(['Division'=> ['id' => $this->id]])
                 -> run();

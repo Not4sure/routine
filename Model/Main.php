@@ -51,7 +51,7 @@ class Main {
         if($type == 'message') {
             if($context->type == 2) {
                 try {
-                    $info = $this->{$context->code}($value);
+                    $info = $this->{$context->function}($value);
                     $context = Entities\Message::search(id: $context->parent, limit: 1);
                 } catch (\Exception $e)  {
                     $info = $e->getMessage();
@@ -92,12 +92,13 @@ class Main {
                 ]
             ];
 
+
         // Отправка сообщения с информацией
         if(isset($info))
             $this->uni()->get('proxy', [
                 'type' => 'message',
                 'value' => $info,
-                'to' => $this->user->guid,
+                'to' => $this->user->guid
             ], 'uni/push')->one();
 
         $this->user->set(['context' => $context->id]);
@@ -124,11 +125,8 @@ class Main {
     }
 
     private function full():string {
-        $lesson = Entities\Lesson::search(id: 2, limit: 1);
-        $lecturers = $lesson->lecturers;
-        $lecturers[] = Entities\Lecturer::search(id: 1, limit: 1);
-        $lesson->set(['lecturers' => $lecturers, 'divisions' => Division::search(id: 1), /*'time' => new \DateTime('now')*/])->save();
-//        $this->insertLessons(file_get_contents(ROOT. 'data/sample'));
+//        $this->insertLessons(file_get_contents(ROOT. 'data/1 курс'));
+
         return 'Цю штуку ще не завезли)';
     }
 
@@ -139,7 +137,17 @@ class Main {
     public function insertLessons(string $lessons):bool {
         $lessons = json_decode($lessons, true);
         foreach($lessons as $lesson) {
-            new Lesson();
+            $lecturers = [];
+            foreach($lesson['lecturers'] as $lecturer)
+                $lecturers[] = Entities\Lecturer::search(guid: $lecturer, limit: 1) ?? (new Entities\Lecturer(guid: $lecturer))->save();
+            $divisions = [];
+            foreach($lesson['divisions'] as $division)
+                $divisions[] = Entities\Division::search(name: $division, limit: 1) ?? (new Entities\Division(name: $division))->save();
+            $subject = Entities\Subject::search($lesson['subject'], limit: 1);
+            $room = $lesson['room'] ? Entities\Room::search($lesson['room'], limit: 1) : null;
+            foreach($lesson['weeks'] as $week)
+                (new Entities\Lesson($divisions, $subject, Entities\Lesson::getTime($week, $lesson['day'], $lesson['lesson_num']),
+                    $lecturers, $room, type: $lesson['type']))->save();
 
         }
         return true;

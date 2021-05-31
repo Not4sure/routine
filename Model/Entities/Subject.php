@@ -13,7 +13,7 @@ class Subject {
         $result = [];
 
         $class = __CLASS__;
-        $result[] = new $class($guid, 'Об\'єктно-орієнтоване програмування');
+        $result[] = new $class($guid, $guid);
 
         return $limit == 1 ? (isset($result[0]) ? $result[0] : null) : $result;
     }

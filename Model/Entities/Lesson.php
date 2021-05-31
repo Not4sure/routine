@@ -5,6 +5,13 @@ class Lesson {
     use \Library\Shared;
 	use \Library\Entity;
 
+	public static function getTime(int $week, int $day, int $num): \DateTime {
+	    $week-=1;
+	    $day-=1;
+	    $minutes = ($num - 1) * 110;
+        return new \DateTime("22 February 2021 8:00 +$week weeks +$day days +$minutes minutes");
+    }
+
     public static function search(Int $id = 0, ?string $room = null, ?string $subject = null,
                                   ?string $division = null, int $since = 0, int $till = 0,
                                   ?string $lecturer = null, ?string $type = null, Int $limit = 0):self|array|null{
@@ -54,7 +61,7 @@ class Lesson {
             if($lesson['room'])
                 $room = Room::search(guid: $lesson['room'], limit: 1);
 
-            $result[] = new $class($lecturers, $divisions, $subject, $time,
+            $result[] = new $class($divisions, $subject, $time, $lecturers,
                 $room, $lesson['id'], $lesson['type'], $lesson['comment']);
         }
         return $limit == 1 ? ($result[0] ?? null) : $result;
@@ -87,27 +94,27 @@ class Lesson {
                 $db -> insert([
                     'LessonLecturer' => [
                         'lesson' => $this->id,
-                        'lecturer' => $lecturer->guid
+                        'lecturer' => $lecturer->id
                     ]
                 ])->run();
             }
         }
 
 		// Todo: тут надо доделать
-        foreach (['lecturer', 'division'] as $index){
-            $field = $index. 's';
-            if(isset($this->_changed[$field])){
-                $table = 'Lesson'. ucfirst($index);
-                $db->delete($table)->where(filters: [$table => [$index => $this->id]])->run();
-                foreach($this->_changed[$field] as $entity)
-                    $db->insert([$table => [
-                        'lesson' => $this->id,
-                        $index => $entity->id
-                    ]]);
-                unset($this->_changed[$field]);
+        if(isset($this->_changed) && !empty($this->_changed)){
+            foreach (['lecturer', 'division'] as $index){
+                $field = $index. 's';
+                if(isset($this->_changed[$field])){
+                    $table = 'Lesson'. ucfirst($index);
+                    $db->delete($table)->where(filters: [$table => [$index => $this->id]])->run();
+                    foreach($this->_changed[$field] as $entity)
+                        $db->insert([$table => [
+                            'lesson' => $this->id,
+                            $index => $entity->id
+                        ]]);
+                    unset($this->_changed[$field]);
+                }
             }
-        }
-        if($this->_changed && !empty($this->_changed)){
             $db -> update('Lesson', $this->_changed )
                 -> where(['Lesson'=> ['id' => $this->id]])
                 -> run();
@@ -115,8 +122,8 @@ class Lesson {
 		return $this;
 	}
 
-    public function __construct(public array $lecturers, public array $divisions, public Subject $subject,
-                                public \DateTime $time, public ?Room $room = null, public int $id = 0,
+    public function __construct(public array $divisions, public Subject $subject, public \DateTime $time,
+                                public array $lecturers, public ?Room $room = null, public int $id = 0,
                                 public ?string $type = null, public ?string $comment = null) {
 		$this->db = $this->getDB();
 	}
